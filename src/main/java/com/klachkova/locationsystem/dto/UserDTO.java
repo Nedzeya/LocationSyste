@@ -1,7 +1,7 @@
 package com.klachkova.locationsystem.dto;
 
-
 import javax.validation.constraints.*;
+
 public class UserDTO {
     @NotEmpty(message = "Name should not be empty")
     @Size(min = 3, max = 30,

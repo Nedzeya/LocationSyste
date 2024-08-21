@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,27 +16,44 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class UserService {
     private final UserRepository userRepository;
-@Autowired
+
+    @Autowired
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    public List<User> findAll(){
-    return userRepository.findAll();
+    @Transactional
+    public void registerUser(User user) {
+        userRepository.save(user);
     }
 
-    public User findOne (int id){
-    return userRepository.findById(id).get();
+    public List<User> findAll() {
+        return userRepository.findAll();
     }
 
-    public Optional<User> findOne (String email){
-    return userRepository.findByEmail (email);
+    public User findOne(int id) {
+        return userRepository.findById(id).get();
+    }
+
+    public User findOne(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
     }
 
     @Transactional
-    public void registerUser (User user) {
-        userRepository.save(user);
+    public void updateUser(int id, User updatedUser) {
+        updatedUser.setId(id);
+        userRepository.save(updatedUser);
     }
+
+    @Transactional
+    public void deleteUser(int id) {
+        userRepository.deleteById(id);
+    }
+
 
 }
 

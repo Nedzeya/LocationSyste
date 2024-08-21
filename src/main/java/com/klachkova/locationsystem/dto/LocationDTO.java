@@ -1,21 +1,12 @@
-package com.klachkova.locationsystem.modeles;
+package com.klachkova.locationsystem.dto;
 
 import com.klachkova.locationsystem.util.annotations.USAddress;
 
-import javax.persistence.*;
+import javax.persistence.Column;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
-@Entity
-@Table(name = "Location")
-public class Location {
-
-    @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-
+public class LocationDTO {
     @Column(name = "name")
     @NotBlank(message = "Name should not be empty")
     @Size(min = 3, max = 30,
@@ -26,28 +17,8 @@ public class Location {
     @USAddress(message = "Address must be in US format (ex.: '123 Main St, Springfield, IL, 62704')")
     private String address;
 
-    @ManyToOne
-    @NotBlank
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private User owner;
-
-    public Location() {
-    }
-
-    public Location(Integer id, String name, String address, User owner) {
-        this.id = id;
-        this.name = name;
-        this.address = address;
-        this.owner = owner;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    @NotBlank(message = "The field must not be empty")
+    private UserDTO owner;
 
     public String getName() {
         return name;
@@ -65,11 +36,11 @@ public class Location {
         this.address = address;
     }
 
-    public User getOwner() {
+    public UserDTO getOwner() {
         return owner;
     }
 
-    public void setOwner(User owner) {
+    public void setOwner(UserDTO owner) {
         this.owner = owner;
     }
 }

@@ -45,13 +45,13 @@ class UserServiceSpec extends Specification {
     {
         given:
         def user = new User(1, "name1", "user1@example.com")
-        userRepository.findByEmail("user1@example.com") >> Optional.of(user)
+        userRepository.findByEmail("user1@example.com") >> user
 
         when:
         def result = userService.findOne("user1@example.com")
 
         then:
-        result.get().email == "user1@example.com"
+        result.email == "user1@example.com"
     }
 
     def "test registerUser saves user"()

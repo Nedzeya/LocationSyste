@@ -3,6 +3,7 @@ package com.klachkova.locationsystem.modeles;
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @Table(name = "User")
@@ -24,13 +25,24 @@ public class User implements Serializable {
     @NotBlank(message = "Email should not be empty")
     private String email;
 
-    public User(Integer id, @NotBlank(message = "Name should not be empty")
-    @Size(min = 3, max = 30, message = "Name should be between 3 and 30 characters")
-            String name, @Email(message = "Email should be valid")
-                @NotBlank(message = "Email should not be empty") String email) {
+    @OneToMany
+    private List<Location> locations;
+
+    public User() {
+    }
+
+    public User(Integer id, String name, String email) {
         this.id = id;
         this.name = name;
         this.email = email;
+    }
+
+    public List<Location> getLocations() {
+        return locations;
+    }
+
+    public void setLocations(List<Location> locations) {
+        this.locations = locations;
     }
 
     public Integer getId() {

@@ -1,4 +1,4 @@
-package com.klachkova.locationsystem.util.validators;
+package com.klachkova.locationsystem.util;
 
 import com.klachkova.locationsystem.util.NotCreatedException;
 import org.springframework.validation.BindingResult;
