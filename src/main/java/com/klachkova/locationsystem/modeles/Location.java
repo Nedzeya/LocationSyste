@@ -5,6 +5,7 @@ import com.klachkova.locationsystem.util.annotations.USAddress;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 @Entity
 @Table(name = "Location")
@@ -31,6 +32,9 @@ public class Location {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User owner;
 
+    @OneToMany
+    private List<User> sharedUsers;
+
     public Location() {
     }
 
@@ -39,6 +43,14 @@ public class Location {
         this.name = name;
         this.address = address;
         this.owner = owner;
+    }
+
+    public List<User> getSharedUsers() {
+        return sharedUsers;
+    }
+
+    public void setSharedUsers(List<User> sharedUsers) {
+        this.sharedUsers = sharedUsers;
     }
 
     public Integer getId() {

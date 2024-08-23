@@ -23,6 +23,7 @@ public class User implements Serializable {
 
     @Email(message = "Email should be valid")
     @NotBlank(message = "Email should not be empty")
+
     private String email;
 
     @OneToMany

@@ -1,6 +1,7 @@
 package com.klachkova.locationsystem.util.validators;
 
 import com.klachkova.locationsystem.modeles.Location;
+import com.klachkova.locationsystem.modeles.LocationAccess;
 import com.klachkova.locationsystem.modeles.User;
 import com.klachkova.locationsystem.services.LocationService;
 import com.klachkova.locationsystem.services.UserService;
@@ -10,39 +11,37 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 @Component
-public class LocationValidator implements Validator {
-    private final LocationService locationService;
+public class LocationAccessValidator implements Validator {
     private final UserService userService;
+    private final LocationService locationService;
 
     @Autowired
-    public LocationValidator(LocationService locationService, UserService userService) {
-        this.locationService = locationService;
+    public LocationAccessValidator(UserService userService, LocationService locationService) {
         this.userService = userService;
+        this.locationService = locationService;
     }
 
     @Override
     public boolean supports(Class<?> clazz) {
-        return Location.class.equals(clazz);
+        return LocationAccess.class.equals(clazz);
     }
 
     @Override
     public void validate(Object target, Errors errors) {
+        LocationAccess locationAccess = (LocationAccess) target;
 
-        Location location = (Location) target;
-
-        User owner = location.getOwner();
-        if (owner == null) return;
-        if (!userService.existsByEmail(owner.getEmail())) {
+        User user = locationAccess.getUser();
+        if (user == null) return;
+        if (!userService.existsByEmail(user.getEmail())) {
             errors.rejectValue("user", "",
                     "No such user in data base");
         }
-        String address = location.getAddress();
-        if (address == null) return;
-        if (locationService.existsByAddress(address)) {
-            errors.rejectValue("address", "",
-                    "Location with that address already exists");
+
+       Location location = locationAccess.getLocation();
+        if (location == null) return;
+        if (!locationService.existsByAddress(location.getAddress())) {
+            errors.rejectValue("location", "",
+                    "No such location in data base");
         }
-
-
     }
 }

@@ -34,7 +34,7 @@ class UserServiceSpec extends Specification {
         userRepository.findById(1) >> Optional.of(user)
 
         when:
-        def result = userService.findOne(1)
+        def result = userService.findById(1)
 
         then:
         result.email == "user1@example.com"
@@ -48,7 +48,7 @@ class UserServiceSpec extends Specification {
         userRepository.findByEmail("user1@example.com") >> user
 
         when:
-        def result = userService.findOne("user1@example.com")
+        def result = userService.findByEmail("user1@example.com")
 
         then:
         result.email == "user1@example.com"

@@ -1,33 +1,35 @@
 package com.klachkova.locationsystem.services;
 
-import com.klachkova.locationsystem.modeles.Location;
-import com.klachkova.locationsystem.modeles.User;
+import com.klachkova.locationsystem.modeles.*;
 import com.klachkova.locationsystem.repositories.LocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
+import java.util.NoSuchElementException;
+
 
 @Service
 @Transactional(readOnly = true)
 public class LocationService {
 
     private final LocationRepository locationRepository;
-    private final UserService userService;
-
-    //   private final LocationAccessRepository locationAccessRepository;
+    private final LocationAccessService locationAccessService;
+    private final UserService userServiсe;
 
 
     @Autowired
-    public LocationService(LocationRepository locationRepository, UserService userService) {
+    public LocationService(LocationRepository locationRepository,
+                           LocationAccessService locationAccessService,
+                           UserService userServiсe) {
         this.locationRepository = locationRepository;
-        this.userService = userService;
+        this.locationAccessService = locationAccessService;
+        this.userServiсe = userServiсe;
     }
 
     @Transactional
     public void registerLocation(Location location) {
-        updateLocation(location);
+        checkRelevanceLocation(location);
         locationRepository.save(location);
     }
 
@@ -35,33 +37,53 @@ public class LocationService {
         return locationRepository.findAll();
     }
 
-    public Location findOne(int id) {
-        return locationRepository.findById(id).get();
+    public Location findById(int id) {
+
+        return locationRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Location with ID " + id + " not found"));
+    }
+    public Location findByAddress(String address) {
+
+        return locationRepository.findByAddress(address)
+                .orElseThrow(() -> new NoSuchElementException("Location with address " + address+ " not found"));
     }
 
-    public void deleteLocation(int id) {
-        locationRepository.deleteById(id);
+    public boolean existsByAddress(String address) {
+
+        return locationRepository.existsByAddress(address);
     }
 
-    public void updateLocation(Location locationDetails) {
+    public void checkRelevanceLocation(Location locationDetails) {
 
         String ownerEmail = locationDetails.getOwner().getEmail();
-        locationDetails.setOwner(userService.findOne(ownerEmail));
+        locationDetails.setOwner(userServise.findByEmail(ownerEmail));
 
     }
-  /*
+
     public List<LocationAccess> getLocationAccesses(int id) {
-        return locationAccessRepository.findAll();
+
+        return locationAccessService.findAll();
+    }
+
+    @Transactional
+    public void shareLocation(int locationId, LocationAccess locationAccess) {
+        if (locationAccess == null) {
+            throw new IllegalArgumentException("There must be shared information: user,location,accessLevel");
+        }
+        Location location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new IllegalArgumentException("Location with ID " + locationId + " not found"));
+
+        locationAccessService.registerLocationAccess(locationAccess);
+    }
+
+    public List<Location> getAllSharedLocations(User user) {
+
+        return locationAccessService.getAllSharedLocations(user);
+    }
+
+    public List<User> getFriendsWithAccessToLocation(int locationId) {
+        return locationAccessService.getFriendsWithAccess(locationId);
     }
 
 
-    public void manageAccess(int locationId, int userId, boolean adminAccess) {
-        LocationAccess locationAccess = new LocationAccess();
-        locationAccess.setLocation(locationRepository.findById(locationId)
-                .orElseThrow (() -> new RuntimeException("Location not found with id " + locationId));
-        locationAccess.setUser(userRepository.findById(userId).orElseThrow());
-        locationAccess.setAdminAccess(adminAccess);
-        locationAccessRepository.save(locationAccess);
-    }
- */
 }
