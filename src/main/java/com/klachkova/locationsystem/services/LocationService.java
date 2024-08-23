@@ -15,16 +15,16 @@ public class LocationService {
 
     private final LocationRepository locationRepository;
     private final LocationAccessService locationAccessService;
-    private final UserService userServiсe;
+    private final UserService userService;
 
 
     @Autowired
     public LocationService(LocationRepository locationRepository,
                            LocationAccessService locationAccessService,
-                           UserService userServiсe) {
+                           UserService userService) {
         this.locationRepository = locationRepository;
         this.locationAccessService = locationAccessService;
-        this.userServiсe = userServiсe;
+        this.userService = userService;
     }
 
     @Transactional
@@ -56,7 +56,7 @@ public class LocationService {
     public void checkRelevanceLocation(Location locationDetails) {
 
         String ownerEmail = locationDetails.getOwner().getEmail();
-        locationDetails.setOwner(userServise.findByEmail(ownerEmail));
+        locationDetails.setOwner(userService.findByEmail(ownerEmail));
 
     }
 
