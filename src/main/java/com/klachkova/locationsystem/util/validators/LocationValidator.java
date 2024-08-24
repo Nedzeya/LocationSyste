@@ -32,6 +32,7 @@ public class LocationValidator implements Validator {
 
         User owner = location.getOwner();
         if (owner == null) return;
+
         if (!userService.existsByEmail(owner.getEmail())) {
             errors.rejectValue("user", "",
                     "No such user in data base");

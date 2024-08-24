@@ -19,45 +19,18 @@ import java.util.stream.Collectors;
 public class LocationAccessService {
 
     private final LocationAccessRepository locationAccessRepository;
-    private final UserService userService;
     private final LocationRepository locationRepository;
 
     @Autowired
     public LocationAccessService(LocationAccessRepository locationAccessRepository,
-                                 UserService userService,
                                  LocationRepository locationRepository) {
         this.locationAccessRepository = locationAccessRepository;
-        this.userService = userService;
         this.locationRepository = locationRepository;
     }
 
 
-    @Transactional
-    public void registerLocationAccess(LocationAccess locationAccess) {
-        checkRelevanceLocationAccess(locationAccess);
-        locationAccessRepository.save(locationAccess);
-
-    }
-
-    public void checkRelevanceLocationAccess(LocationAccess locationAccessDetails) {
-
-        String userEmail = locationAccessDetails.getUser().getEmail();
-        String locationAddress = locationAccessDetails.getLocation().getAddress();
-
-        locationAccessDetails.setUser(userService.findByEmail(userEmail));
-        locationAccessDetails.setLocation(locationRepository.findByAddress(locationAddress)
-                .orElseThrow(() -> new NoSuchElementException("LocationAccess with address" + locationAddress + " not found")));
-
-
-    }
-
     public List<LocationAccess> findAll() {
         return locationAccessRepository.findAll();
-    }
-
-    public LocationAccess findById(int id) {
-        return locationAccessRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("LocationAccess with ID " + id + " not found"));
     }
 
     public List<Location> getAllSharedLocations(User user) {
@@ -70,10 +43,21 @@ public class LocationAccessService {
     }
 
     @Transactional
+    public void shareLocation(int locationId, User user, AccessLevel accessLevel) {
+
+        Location location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new IllegalArgumentException("Location with ID " + locationId + " not found"));
+
+        LocationAccess locationAccess = new LocationAccess(user, location, accessLevel);
+
+        locationAccessRepository.save(locationAccess);
+    }
+
+    @Transactional
     public void updateLocationAccessByAccessLevel(int locationId, User user, AccessLevel accessLevel) {
         LocationAccess locationAccess = locationAccessRepository.findByLocationIdAndUser(locationId, user)
                 .orElseThrow(() -> new NoSuchElementException("LocationAccess with locationId" + locationId + " and user " + user + " not found"));
-
+        locationAccess.setAccessLevel(accessLevel);
         locationAccessRepository.save(locationAccess);
     }
 

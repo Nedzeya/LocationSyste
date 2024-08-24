@@ -45,17 +45,6 @@ public class UserService {
         return userRepository.existsByEmail(email);
     }
 
-    @Transactional
-    public void updateUser(int id, User updatedUser) {
-        updatedUser.setId(id);
-        userRepository.save(updatedUser);
-    }
-
-    @Transactional
-    public void deleteUser(int id) {
-        userRepository.deleteById(id);
-    }
-
 
 }
 

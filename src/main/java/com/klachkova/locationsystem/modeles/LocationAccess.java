@@ -31,26 +31,12 @@ public class LocationAccess {
     public LocationAccess() {
     }
 
-    public LocationAccess(@NotBlank User user, @NotBlank Location location, AccessLevel accessLevel) {
+    public LocationAccess( User user, Location location, AccessLevel accessLevel) {
         this.user = user;
         this.location = location;
         this.accessLevel = accessLevel;
     }
 
-    public LocationAccess(int id, User user, Location location, AccessLevel accessLevel) {
-        this.id = id;
-        this.user = user;
-        this.location = location;
-        this.accessLevel = accessLevel;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
 
     public User getUser() {
         return user;

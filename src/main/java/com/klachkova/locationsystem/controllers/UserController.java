@@ -2,12 +2,8 @@ package com.klachkova.locationsystem.controllers;
 
 import com.klachkova.locationsystem.dto.LocationDTO;
 import com.klachkova.locationsystem.dto.UserDTO;
-import com.klachkova.locationsystem.modeles.AccessLevel;
-import com.klachkova.locationsystem.modeles.Location;
-import com.klachkova.locationsystem.modeles.User;
-import com.klachkova.locationsystem.services.LocationAccessService;
-import com.klachkova.locationsystem.services.LocationService;
-import com.klachkova.locationsystem.services.UserService;
+import com.klachkova.locationsystem.modeles.*;
+import com.klachkova.locationsystem.services.*;
 import com.klachkova.locationsystem.util.annotations.USAddress;
 import com.klachkova.locationsystem.util.annotations.ValidAccessLevel;
 import com.klachkova.locationsystem.util.converters.LocationConverter;
@@ -20,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import javax.validation.constraints.Email;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,15 +47,6 @@ public class UserController {
     }
 
 
-    @GetMapping()
-    public List<UserDTO> getAllUsers() {
-        return userService.findAll()
-                .stream()
-                .map(userConverter::convertToDto)
-                .collect(Collectors.toList());
-
-    }
-
     @PostMapping()
     public ResponseEntity<User> registerUser(@Validated @RequestBody UserDTO userDTO,
                                              BindingResult bindingResult) {
@@ -76,44 +62,6 @@ public class UserController {
 
         return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
 
-    }
-
-    // for testing
-    @GetMapping("byId/{id}")
-    public UserDTO getUser(@PathVariable("id") int id) {
-
-        return userConverter.convertToDto(userService.findById(id));
-    }
-
-    @GetMapping("byEmail/{email}")
-    public UserDTO getUser(@PathVariable("email") String email) {
-        return userConverter.convertToDto(userService.findByEmail(email));
-    }
-//
-
-    @PatchMapping("/{id}")
-    public ResponseEntity<UserDTO> updateUser(@PathVariable int id,
-                                              @Validated @RequestBody UserDTO userDTO,
-                                              BindingResult bindingResult) {
-
-
-        User updatedUser = userConverter.convertToEntity(userDTO);
-        userValidator.validate(updatedUser, bindingResult);
-
-        if (bindingResult.hasErrors()) {
-            returnErrorsToClient(bindingResult);
-        }
-
-        userService.updateUser(id, updatedUser);
-
-
-        return new ResponseEntity<>(userConverter.convertToDto(updatedUser), HttpStatus.OK);
-
-    }
-
-    @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable int id) {
-        userService.deleteUser(id);
     }
 
     @GetMapping("/{id}/availableLocations") //own+shared with user

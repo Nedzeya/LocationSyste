@@ -30,8 +30,6 @@ public class LocationController {
     private final LocationValidator locationValidator;
     private final LocationConverter locationConverter;
     private final LocationAccessService locationAccessService;
-    private final LocationAccessConverter locationAccessConverter;
-    private final LocationAccessValidator locationAccessValidator;
     private final UserService userService;
     private final UserValidator userValidator;
     private final UserConverter userConverter;
@@ -41,16 +39,13 @@ public class LocationController {
     public LocationController(LocationService locationService,
                               LocationValidator locationValidator,
                               LocationConverter locationConverter,
-                              LocationAccessService locationAccessService, LocationAccessConverter locationAccessConverter,
-                              LocationAccessValidator locationAccessValidator,
+                              LocationAccessService locationAccessService,
                               UserService userService,
                               UserValidator userValidator, UserConverter userConverter) {
         this.locationService = locationService;
         this.locationValidator = locationValidator;
         this.locationConverter = locationConverter;
         this.locationAccessService = locationAccessService;
-        this.locationAccessConverter = locationAccessConverter;
-        this.locationAccessValidator = locationAccessValidator;
         this.userService = userService;
         this.userValidator = userValidator;
         this.userConverter = userConverter;
@@ -74,34 +69,20 @@ public class LocationController {
 
     }
 
-    // for testing
-    @GetMapping()
-    public List<LocationDTO> getAllLocations() {
-        return locationService.findAll()
-                .stream()
-                .map(locationConverter::convertToDto)
-                .collect(Collectors.toList());
-
-    }
-
-    @GetMapping("/{id}")
-    public LocationDTO getLocation(@PathVariable("id") int id) {
-        return locationConverter.convertToDto(locationService.findById(id));
-    }
-
-    //
     @PostMapping("/{id}/share")
     public ResponseEntity<String> shareLocation(@PathVariable("id") int id,
-                                                @Validated @RequestBody LocationAccessDTO locationAccessDTO,
+                                                @RequestParam("userEmail") @Email String userEmail,
+                                                @RequestParam("accessLevel") @ValidAccessLevel AccessLevel accessLevel,
                                                 BindingResult bindingResult) {
 
-        LocationAccess newLocationAccess = locationAccessConverter.convertToEntity(locationAccessDTO);
-        locationAccessValidator.validate(newLocationAccess, bindingResult);
+        User user = userService.findByEmail(userEmail);
+
+        userValidator.validate(user, bindingResult);
 
         if (bindingResult.hasErrors()) {
             returnErrorsToClient(bindingResult);
         }
-        locationService.shareLocation(id, newLocationAccess);
+        locationAccessService.shareLocation(id, user, accessLevel);
         return ResponseEntity.ok("Location shared successfully");
 
     }

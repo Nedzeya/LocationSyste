@@ -1,6 +1,5 @@
 package com.klachkova.locationsystem.util;
 
-import com.klachkova.locationsystem.util.NotCreatedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 

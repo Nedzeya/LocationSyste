@@ -5,6 +5,7 @@ import com.klachkova.locationsystem.repositories.LocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -42,10 +43,11 @@ public class LocationService {
         return locationRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Location with ID " + id + " not found"));
     }
+
     public Location findByAddress(String address) {
 
         return locationRepository.findByAddress(address)
-                .orElseThrow(() -> new NoSuchElementException("Location with address " + address+ " not found"));
+                .orElseThrow(() -> new NoSuchElementException("Location with address " + address + " not found"));
     }
 
     public boolean existsByAddress(String address) {
@@ -58,22 +60,6 @@ public class LocationService {
         String ownerEmail = locationDetails.getOwner().getEmail();
         locationDetails.setOwner(userService.findByEmail(ownerEmail));
 
-    }
-
-    public List<LocationAccess> getLocationAccesses(int id) {
-
-        return locationAccessService.findAll();
-    }
-
-    @Transactional
-    public void shareLocation(int locationId, LocationAccess locationAccess) {
-        if (locationAccess == null) {
-            throw new IllegalArgumentException("There must be shared information: user,location,accessLevel");
-        }
-        Location location = locationRepository.findById(locationId)
-                .orElseThrow(() -> new IllegalArgumentException("Location with ID " + locationId + " not found"));
-
-        locationAccessService.registerLocationAccess(locationAccess);
     }
 
     public List<Location> getAllSharedLocations(User user) {

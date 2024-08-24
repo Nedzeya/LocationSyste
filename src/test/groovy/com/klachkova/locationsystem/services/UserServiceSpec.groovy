@@ -13,8 +13,8 @@ class UserServiceSpec extends Specification {
 
     {
         given:
-        def user1 = new User(1, "name1", "user1@example.com")
-        def user2 = new User(2, "name2", "user2@example.com")
+        def user1 = new User( "name1", "user1@example.com")
+        def user2 = new User("name2", "user2@example.com")
         userRepository.findAll() >> [user1, user2]
 
         when:
@@ -30,7 +30,7 @@ class UserServiceSpec extends Specification {
 
     {
         given:
-        def user = new User(1, "name1", "user1@example.com")
+        def user = new User( "name1", "user1@example.com")
         userRepository.findById(1) >> Optional.of(user)
 
         when:
@@ -44,8 +44,8 @@ class UserServiceSpec extends Specification {
 
     {
         given:
-        def user = new User(1, "name1", "user1@example.com")
-        userRepository.findByEmail("user1@example.com") >> user
+        def user = new User( "name1", "user1@example.com")
+        userRepository.findByEmail("user1@example.com") >> Optional.of(user)
 
         when:
         def result = userService.findByEmail("user1@example.com")
@@ -58,7 +58,7 @@ class UserServiceSpec extends Specification {
 
     {
         given:
-        def user = new User(1, "name1", "newuser@example.com")
+        def user = new User( "name1", "newuser@example.com")
 
         when:
         userService.registerUser(user)
