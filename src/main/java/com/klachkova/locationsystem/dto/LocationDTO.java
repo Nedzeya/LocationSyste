@@ -1,7 +1,6 @@
 package com.klachkova.locationsystem.dto;
 
 import com.klachkova.locationsystem.util.annotations.USAddress;
-
 import javax.persistence.Column;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -19,6 +18,4 @@ public class LocationDTO {
 
     @NotBlank(message = "The field must not be empty")
     private UserDTO owner;
-
-
 }

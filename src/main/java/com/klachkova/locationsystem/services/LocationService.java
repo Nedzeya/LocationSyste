@@ -2,10 +2,10 @@ package com.klachkova.locationsystem.services;
 
 import com.klachkova.locationsystem.modeles.*;
 import com.klachkova.locationsystem.repositories.LocationRepository;
+import com.klachkova.locationsystem.util.NotCreatedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -18,7 +18,6 @@ public class LocationService {
     private final LocationAccessService locationAccessService;
     private final UserService userService;
 
-
     @Autowired
     public LocationService(LocationRepository locationRepository,
                            LocationAccessService locationAccessService,
@@ -30,46 +29,29 @@ public class LocationService {
 
     @Transactional
     public void registerLocation(Location location) {
-        checkRelevanceLocation(location);
+        if (!userService.existsByEmail(location.getOwner().getEmail())) {
+            throw new NotCreatedException("No such user in the database");
+        }
+        if (existsByAddress(location.getAddress())) {
+            throw new NotCreatedException("Location with that address already exists");
+        }
         locationRepository.save(location);
     }
 
-    public List<Location> findAll() {
-        return locationRepository.findAll();
-    }
-
-    public Location findById(int id) {
-
-        return locationRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Location with ID " + id + " not found"));
-    }
-
     public Location findByAddress(String address) {
-
         return locationRepository.findByAddress(address)
                 .orElseThrow(() -> new NoSuchElementException("Location with address " + address + " not found"));
     }
 
     public boolean existsByAddress(String address) {
-
         return locationRepository.existsByAddress(address);
     }
 
-    public void checkRelevanceLocation(Location locationDetails) {
-
-        String ownerEmail = locationDetails.getOwner().getEmail();
-        locationDetails.setOwner(userService.findByEmail(ownerEmail));
-
-    }
-
     public List<Location> getAllSharedLocations(User user) {
-
         return locationAccessService.getAllSharedLocations(user);
     }
 
     public List<User> getFriendsWithAccessToLocation(int locationId) {
         return locationAccessService.getFriendsWithAccess(locationId);
     }
-
-
 }

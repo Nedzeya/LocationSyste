@@ -9,7 +9,6 @@ import com.klachkova.locationsystem.repositories.LocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -35,7 +34,6 @@ public class LocationAccessService {
 
     public List<Location> getAllSharedLocations(User user) {
         List<LocationAccess> locationAccesses = locationAccessRepository.findByUser(user);
-
         return locationAccesses.stream()
                 .map(LocationAccess::getLocation)
                 .distinct()
@@ -44,12 +42,9 @@ public class LocationAccessService {
 
     @Transactional
     public void shareLocation(int locationId, User user, AccessLevel accessLevel) {
-
         Location location = locationRepository.findById(locationId)
                 .orElseThrow(() -> new IllegalArgumentException("Location with ID " + locationId + " not found"));
-
         LocationAccess locationAccess = new LocationAccess(user, location, accessLevel);
-
         locationAccessRepository.save(locationAccess);
     }
 
@@ -62,9 +57,7 @@ public class LocationAccessService {
     }
 
     public List<User> getFriendsWithAccess(int locationId) {
-
         List<LocationAccess> accesses = locationAccessRepository.findByLocationId(locationId);
-
         return accesses.stream()
                 .map(LocationAccess::getUser)
                 .collect(Collectors.toList());
@@ -72,17 +65,11 @@ public class LocationAccessService {
 
     @Transactional
     public void addFriendToLocation(Location location, User user, User friendUser, AccessLevel accessLevel) {
-
         LocationAccess adminAccess = locationAccessRepository.findByLocationIdAndUser(location.getId(), user)
                 .orElseThrow(() -> new IllegalArgumentException("User does not have access to this location"));
-
         if (adminAccess.getAccessLevel() != AccessLevel.ADMIN) {
             throw new SecurityException("User does not have admin access to this location");
         }
-
         locationAccessRepository.save(new LocationAccess(friendUser, location, accessLevel));
-
     }
-
-
 }

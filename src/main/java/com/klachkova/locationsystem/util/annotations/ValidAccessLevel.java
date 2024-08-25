@@ -12,5 +12,4 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = AccessLevelValidator.class)
 public @interface ValidAccessLevel {
     String message() default "Invalid access level";
-
 }

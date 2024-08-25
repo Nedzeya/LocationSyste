@@ -13,5 +13,4 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface USAddress {
     String message() default "Invalid US address format";
-
 }

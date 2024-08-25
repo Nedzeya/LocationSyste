@@ -14,13 +14,10 @@ public class LocationConverter {
     public LocationConverter(ModelMapper modelMapper) {
         this.modelMapper = modelMapper;
     }
-
     public Location convertToEntity(LocationDTO locationDTO){
         return modelMapper.map(locationDTO, Location.class);
     }
-
     public LocationDTO convertToDto(Location location){
         return modelMapper.map(location, LocationDTO.class);
     }
-
 }

@@ -1,7 +1,6 @@
 package com.klachkova.locationsystem.modeles;
 
 import com.klachkova.locationsystem.util.annotations.USAddress;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -16,11 +15,9 @@ public class Location {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-
     @Column(name = "name")
     @NotBlank(message = "Name should not be empty")
-    @Size(min = 3, max = 30,
-            message = "Name should be between 3 and 30 characters")
+    @Size(min = 3, max = 30, message = "Name should be between 3 and 30 characters")
     private String name;
 
     @NotBlank(message = "Address should not be empty")

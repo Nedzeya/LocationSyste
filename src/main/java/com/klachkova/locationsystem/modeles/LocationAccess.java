@@ -1,7 +1,6 @@
 package com.klachkova.locationsystem.modeles;
 
 import com.klachkova.locationsystem.util.annotations.ValidAccessLevel;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 

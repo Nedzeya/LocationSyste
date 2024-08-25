@@ -2,13 +2,15 @@ package com.klachkova.locationsystem.util.validators;
 
 import com.klachkova.locationsystem.modeles.AccessLevel;
 import com.klachkova.locationsystem.util.annotations.ValidAccessLevel;
+import org.springframework.stereotype.Component;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+@Component
 public class AccessLevelValidator implements ConstraintValidator<ValidAccessLevel, AccessLevel> {
     @Override
     public void initialize(ValidAccessLevel constraintAnnotation) {
-
     }
 
     @Override
