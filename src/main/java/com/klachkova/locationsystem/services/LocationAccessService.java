@@ -5,7 +5,6 @@ import com.klachkova.locationsystem.modeles.Location;
 import com.klachkova.locationsystem.modeles.LocationAccess;
 import com.klachkova.locationsystem.modeles.User;
 import com.klachkova.locationsystem.repositories.LocationAccessRepository;
-import com.klachkova.locationsystem.repositories.LocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,18 +17,16 @@ import java.util.stream.Collectors;
 public class LocationAccessService {
 
     private final LocationAccessRepository locationAccessRepository;
-    private final LocationRepository locationRepository;
+    private final UserService userService;
+    private final LocationService locationService;
 
     @Autowired
     public LocationAccessService(LocationAccessRepository locationAccessRepository,
-                                 LocationRepository locationRepository) {
+                                 UserService userService,
+                                 LocationService locationService) {
         this.locationAccessRepository = locationAccessRepository;
-        this.locationRepository = locationRepository;
-    }
-
-
-    public List<LocationAccess> findAll() {
-        return locationAccessRepository.findAll();
+        this.userService = userService;
+        this.locationService = locationService;
     }
 
     public List<Location> getAllSharedLocations(User user) {
@@ -41,22 +38,21 @@ public class LocationAccessService {
     }
 
     @Transactional
-    public void shareLocation(int locationId, User user, AccessLevel accessLevel) {
-        Location location = locationRepository.findById(locationId)
-                .orElseThrow(() -> new IllegalArgumentException("Location with ID " + locationId + " not found"));
-        LocationAccess locationAccess = new LocationAccess(user, location, accessLevel);
-        locationAccessRepository.save(locationAccess);
+    public void shareLocation(int locationId, String userEmail, AccessLevel accessLevel) {
+        User user = userService.findByEmail(userEmail);
+        locationAccessRepository.save(new LocationAccess(user, locationService.findById(locationId), accessLevel));
     }
 
     @Transactional
-    public void updateLocationAccessByAccessLevel(int locationId, User user, AccessLevel accessLevel) {
-        LocationAccess locationAccess = locationAccessRepository.findByLocationIdAndUser(locationId, user)
-                .orElseThrow(() -> new NoSuchElementException("LocationAccess with locationId" + locationId + " and user " + user + " not found"));
+    public void updateLocationAccessByAccessLevel(int locationId, String userEmail, AccessLevel accessLevel) {
+        User user = userService.findByEmail(userEmail);
+        LocationAccess locationAccess = locationAccessRepository.findByLocationAndUser(locationService.findById(locationId), user)
+                .orElseThrow(() -> new NoSuchElementException("LocationAccess with locationID" + locationId + " and userEmail " + userEmail + " not found"));
         locationAccess.setAccessLevel(accessLevel);
         locationAccessRepository.save(locationAccess);
     }
 
-    public List<User> getFriendsWithAccess(int locationId) {
+    public List<User> getFriends(int locationId) {
         List<LocationAccess> accesses = locationAccessRepository.findByLocationId(locationId);
         return accesses.stream()
                 .map(LocationAccess::getUser)
@@ -64,11 +60,15 @@ public class LocationAccessService {
     }
 
     @Transactional
-    public void addFriendToLocation(Location location, User user, User friendUser, AccessLevel accessLevel) {
-        LocationAccess adminAccess = locationAccessRepository.findByLocationIdAndUser(location.getId(), user)
-                .orElseThrow(() -> new IllegalArgumentException("User does not have access to this location"));
+    public void addFriendToLocation(int userId, String friendEmail, String locationAddress, AccessLevel accessLevel) {
+        User friendUser = userService.findByEmail(friendEmail);
+        Location location = locationService.findByAddress(locationAddress);
+        LocationAccess adminAccess = locationAccessRepository.findByLocationAndUser(location,userService.findById(userId))
+                .orElseThrow(() -> new SecurityException(
+                        "User with ID " + userId + " does not have access to this location"));
         if (adminAccess.getAccessLevel() != AccessLevel.ADMIN) {
-            throw new SecurityException("User does not have admin access to this location");
+            throw new SecurityException(
+                    "User with ID " + userId + " does not have ADMIN access to location with address " + locationAddress);
         }
         locationAccessRepository.save(new LocationAccess(friendUser, location, accessLevel));
     }

@@ -49,6 +49,14 @@ public class ControllerAdvice {
         );
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
+@ExceptionHandler
+    private ResponseEntity<ErrorResponse> handleException(SecurityException e) {
+        ErrorResponse response = new ErrorResponse(
+                e.getMessage(),
+                System.currentTimeMillis()
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 
 
 }

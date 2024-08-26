@@ -2,25 +2,24 @@ package com.klachkova.locationsystem.services
 
 import com.klachkova.locationsystem.modeles.User
 import com.klachkova.locationsystem.repositories.UserRepository
-import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Unroll
+import com.klachkova.locationsystem.util.NotCreatedException
 
 
 class UserServiceSpec extends Specification {
-
-    @Autowired
     UserRepository userRepository = Mock(UserRepository)
-
     @Subject
     UserService userService = new UserService(userRepository)
 
-    def "test registerUser saves user"()
-
-    {
+    def "test registerUser saves user"() {
         given:
-        def user = new User("name1", "newuser@example.com")
+        def email = "name1@example.com"
+        def user = new User(email: email)
+
+        and:
+        userRepository.existsByEmail(email) >> false
 
         when:
         userService.registerUser(user)
@@ -29,12 +28,28 @@ class UserServiceSpec extends Specification {
         1 * userRepository.save(user)
     }
 
-    def "test findAll returns all users"()
-
-    {
+    def "test registerUser should throw NotCreatedException if user with email already exists"() {
         given:
-        def user1 = new User("name1", "user1@example.com")
-        def user2 = new User("name2", "user2@example.com")
+        def email = "name1@example.com"
+        def user = new User(email: email)
+
+        and:
+        userRepository.existsByEmail(email) >> true
+
+        when:
+        userService.registerUser(user)
+
+        then:
+        thrown(NotCreatedException)
+    }
+
+
+    def "test findAll returns all users"() {
+        given:
+        def user1 = new User(email: "user1@example.com")
+        def user2 = new User(email: "user2@example.com")
+
+        and:
         userRepository.findAll() >> [user1, user2]
 
         when:
@@ -46,13 +61,11 @@ class UserServiceSpec extends Specification {
         result[1].email == "user2@example.com"
     }
 
-    def "test findById should return the user when found"()
-
-    {
+    def "test findById should return the user when found"() {
         given:
+        def user = new User(id: 1)
 
-        def user = new User("name1", "user1@example.com")
-        user.setId(1)
+        and:
         userRepository.findById(1) >> Optional.of(user)
 
         when:
@@ -77,7 +90,9 @@ class UserServiceSpec extends Specification {
 
         given:
         def email = "name1@example.com"
-        def user = new User("name1", email)
+        def user = new User(email: email)
+
+        and:
         userRepository.findByEmail(email) >> Optional.of(user)
 
         when:
@@ -88,10 +103,10 @@ class UserServiceSpec extends Specification {
     }
 
     def "test findByEmail should throw NoSuchElementException when user not found"() {
-
-
         given:
         def email = "name1@example.com"
+
+        and:
         userRepository.findByEmail(email) >> Optional.empty()
 
         when:
@@ -103,8 +118,6 @@ class UserServiceSpec extends Specification {
 
     @Unroll
     def "test existsByEmail should return #expectedResult when email is #email"() {
-
-
         given:
         userRepository.existsByEmail(email) >> expectedResult
 
@@ -116,5 +129,4 @@ class UserServiceSpec extends Specification {
         "name1@example.com" | true
         "name2@example.com" | false
     }
-
 }

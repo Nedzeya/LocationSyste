@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import java.util.List;
@@ -51,8 +52,7 @@ public class LocationController {
                                                 @RequestParam("userEmail") @Email String userEmail,
                                                 @RequestParam("accessLevel") @ValidAccessLevel AccessLevel accessLevel) {
 
-        User user = userService.findByEmail(userEmail);
-        locationAccessService.shareLocation(id, user, accessLevel);
+        locationAccessService.shareLocation(id, userEmail, accessLevel);
         return ResponseEntity.ok("Location shared successfully");
     }
 
@@ -61,22 +61,20 @@ public class LocationController {
     public ResponseEntity<String> updateAccessLevel(@PathVariable("id") int locationId,
                                                     @RequestParam("userEmail") @Email String userEmail,
                                                     @RequestParam("accessLevel") @ValidAccessLevel AccessLevel accessLevel) {
-
-        User user = userService.findByEmail(userEmail);
-        locationAccessService.updateLocationAccessByAccessLevel(locationId, user, accessLevel);
+        locationAccessService.updateLocationAccessByAccessLevel(locationId, userEmail, accessLevel);
         return ResponseEntity.ok("Access level updated successfully.");
     }
 
-    @GetMapping("{id}/friends")
-    public ResponseEntity<List<UserDTO>> getAllUsersWithAccess(@PathVariable("id") int id) {
-        List<UserDTO> usersWithAccess = locationService.getFriendsWithAccessToLocation(id)
+    @GetMapping("{id}/friends") //all friend users on the location
+    public ResponseEntity<List<UserDTO>> getAllFriendUsers (@PathVariable("id") int id) {
+        List<UserDTO> friends = locationService.getFriendsToLocation(id)
                 .stream()
                 .map(userConverter::convertToDto)
                 .collect(Collectors.toList());
-        if (usersWithAccess.isEmpty()) {
+        if (friends.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(usersWithAccess, HttpStatus.OK);
+        return new ResponseEntity<>(friends, HttpStatus.OK);
     }
 }
 

@@ -3,64 +3,135 @@ package com.klachkova.locationsystem.services
 import com.klachkova.locationsystem.modeles.Location
 import com.klachkova.locationsystem.modeles.User
 import com.klachkova.locationsystem.repositories.LocationRepository
-import org.springframework.beans.factory.annotation.Autowired
+import com.klachkova.locationsystem.util.NotCreatedException
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Unroll
-/*
+
 class LocationServiceSpec extends Specification {
 
-    @Autowired
     LocationRepository locationRepository = Mock()
-    @Autowired
     LocationAccessService locationAccessService = Mock()
-    @Autowired
     UserService userService = Mock()
 
     @Subject
     LocationService locationService = new LocationService(locationRepository, locationAccessService, userService)
 
 
-    def "test registerLocation should register a location"() {
+    def "test registerLocation saves location"() {
 
         given:
-        def location = new Location(address: "123 Main St", owner: new User(email: "owner@example.com"))
+        def email = "name1@example.com"
+        def user = new User(email: email)
+        def locationAddress = "123 Main St, Springfield, IL, 62704"
+        def location = new Location(address: locationAddress, owner: user)
+
+        and:
+        userService.existsByEmail(email) >> true
+        locationRepository.existsByAddress(location.getAddress()) >> false
 
         when:
         locationService.registerLocation(location)
 
         then:
-        1 * userService.findByEmail("owner@example.com") >> location.owner
         1 * locationRepository.save(location)
     }
 
-    def "test findByAddress should return location when found"() {
-
+    def "test registerLocation should throw NotCreatedException if user does not exist"() {
         given:
-        def address = "123 Main St"
-        def location = new Location(address: address)
-        locationRepository.findByAddress(address) >> Optional.of(location)
+        def email = "name1@example.com"
+        def user = new User(email: email)
+        def location = new Location(owner: user)
+
+        and:
+        userService.existsByEmail(email) >> false
 
         when:
-        def result = locationService.findByAddress(address)
+        locationService.registerLocation(location)
+
+        then:
+        thrown(NotCreatedException)
+    }
+
+    def "test registerLocation should throw NotCreatedException if location address already exists"() {
+        given:
+        def email = "name1@example.com"
+        def owner = new User(email: email)
+        def locationAddress = "123 Main St, Springfield, IL, 62704"
+        def location = new Location(address: locationAddress, owner: owner)
+
+        and:
+        userService.existsByEmail(email) >> true
+        locationRepository.existsByAddress(locationAddress) >> true
+
+        when:
+        locationService.registerLocation(location)
+
+        then:
+        thrown(NotCreatedException)
+    }
+
+
+    def "test findByAddress should return the location when found"() {
+
+        given:
+        def locationAddress = "123 Main St, Springfield, IL, 62704"
+        def location = new Location(address: locationAddress)
+
+        and:
+        locationRepository.findByAddress(locationAddress) >> Optional.of(location)
+
+        when:
+        def result = locationService.findByAddress(locationAddress)
 
         then:
         result == location
     }
 
-    def "test findByAddress should throw noSuchElementException when location not found"() {
+    def "test findByAddress should throw NoSuchElementException when location not found"() {
 
         given:
-        def address = "123 Main St"
-        locationRepository.findByAddress(address) >> Optional.empty()
+        def locationAddress = "123 Main St, Springfield, IL, 62704"
+
+        and:
+        locationRepository.findByAddress(locationAddress) >> Optional.empty()
 
         when:
-        locationService.findByAddress(address)
+        locationService.findByAddress(locationAddress)
 
         then:
-        def e = thrown(NoSuchElementException)
-        e.message == "Location with address 123 Main St not found"
+        thrown(NoSuchElementException)
     }
+
+    def "test findById should return the location when found"() {
+        given:
+        def locationId = 1
+        def location = new Location(id: locationId)
+
+        and:
+        locationRepository.findById(locationId) >> Optional.of(location)
+
+        when:
+        def result = locationService.findById(locationId)
+
+        then:
+        result == location
+    }
+
+    def "test findById should throw NoSuchElementException when location not found"() {
+        given:
+        def locationId = 1
+
+        and:
+        locationRepository.findById(locationId) >> Optional.empty()
+
+        when:
+        locationService.findById(locationId)
+
+        then:
+        thrown(NoSuchElementException)
+    }
+
 
     @Unroll
 
@@ -78,42 +149,40 @@ class LocationServiceSpec extends Specification {
         "456 False St" | false
     }
 
-    def "should check relevance of location and update owner"() {
+    def "test getAllSharedLocations should return shared locations for user"() {
         given:
-        def location = new Location(address: "123 Main St", owner: new User(email: "owner@example.com"))
-        def updatedOwner = new User(email: "owner@example.com")
-        userService.findByEmail("owner@example.com") >> updatedOwner
+        def user = new User()
+        def location1 = new Location()
+        def location2 = new Location()
 
-        when:
-        locationService.checkRelevanceLocation(location)
-
-        then:
-        location.owner == updatedOwner
-    }
-
-    def "should get all shared locations for a user"() {
-        given:
-        def user = new User(email: "user@example.com")
-        def locations = [new Location(address: "123 Main St"), new Location(address: "456 Maple St")]
-        locationAccessService.getAllSharedLocations(user) >> locations
+        and:
+        locationAccessService.getAllSharedLocations(user) >> [location1, location2]
 
         when:
         def result = locationService.getAllSharedLocations(user)
 
         then:
-        result == locations
+        result.size() == 2
+        result.contains(location1)
+        result.contains(location2)
     }
 
-    def "should get friends with access to location by locationId"() {
+
+    def "test getFriendsToLocation should return users with access to the location"() {
         given:
         def locationId = 1
-        def users = [new User(email: "friend1@example.com"), new User(email: "friend2@example.com")]
-        locationAccessService.getFriendsWithAccess(locationId) >> users
+        def user1 = new User()
+        def user2 = new User()
+
+        and:
+        locationAccessService.getFriends(locationId) >> [user1, user2]
 
         when:
-        def result = locationService.getFriendsWithAccessToLocation(locationId)
+        def result = locationService.getFriendsToLocation(locationId)
 
         then:
-        result == users
+        result.size() == 2
+        result.contains(user1)
+        result.contains(user2)
     }
-}*/
+}

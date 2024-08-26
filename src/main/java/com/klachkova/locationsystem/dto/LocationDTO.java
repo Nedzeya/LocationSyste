@@ -18,4 +18,6 @@ public class LocationDTO {
 
     @NotBlank(message = "The field must not be empty")
     private UserDTO owner;
+
+
 }

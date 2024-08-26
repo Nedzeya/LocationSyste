@@ -11,4 +11,5 @@ public class UserDTO {
     @Email (message = "Email should be valid")
     @NotEmpty (message = "Email should not be empty")
     private String email;
+
 }

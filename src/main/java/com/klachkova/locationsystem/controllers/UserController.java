@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import java.util.List;
@@ -40,7 +41,7 @@ public class UserController {
     @PostMapping()
     public ResponseEntity<UserDTO> registerUser(@Valid @RequestBody UserDTO userDTO) {
         User registeredUser = userConverter.convertToEntity(userDTO);
-                userService.registerUser(registeredUser);
+        userService.registerUser(registeredUser);
         return new ResponseEntity<>(userConverter.convertToDto(registeredUser), HttpStatus.CREATED);
     }
 
@@ -55,16 +56,11 @@ public class UserController {
 
 
     @PatchMapping("/{id}/addFriendToLocation")
-    public ResponseEntity<String> addFriendToLocation(@PathVariable("id") int id,
-                                                      @RequestParam("locationAddress") @USAddress String locationAddress,
+    public ResponseEntity<String> addFriendToLocation(@PathVariable("id") int userId,
                                                       @RequestParam("friendEmail") @Email String friendEmail,
+                                                      @RequestParam("locationAddress") @USAddress String locationAddress,
                                                       @RequestParam("accessLevel") @ValidAccessLevel AccessLevel accessLevel) {
-
-        User user = userService.findById(id);
-        Location location = locationService.findByAddress(locationAddress);
-        User friendUser = userService.findByEmail(friendEmail);
-
-        locationAccessService.addFriendToLocation(location, user, friendUser, accessLevel);
+        locationAccessService.addFriendToLocation(userId, friendEmail, locationAddress, accessLevel);
         return ResponseEntity.ok("Friend added successfully.");
     }
 }

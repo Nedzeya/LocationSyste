@@ -43,6 +43,11 @@ public class LocationService {
                 .orElseThrow(() -> new NoSuchElementException("Location with address " + address + " not found"));
     }
 
+    public Location findById(int id) {
+        return locationRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Location with ID " + id + " not found"));
+    }
+
     public boolean existsByAddress(String address) {
         return locationRepository.existsByAddress(address);
     }
@@ -51,7 +56,7 @@ public class LocationService {
         return locationAccessService.getAllSharedLocations(user);
     }
 
-    public List<User> getFriendsWithAccessToLocation(int locationId) {
-        return locationAccessService.getFriendsWithAccess(locationId);
+    public List<User> getFriendsToLocation(int locationId) {
+        return locationAccessService.getFriends (locationId);
     }
 }
