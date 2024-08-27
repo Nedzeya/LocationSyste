@@ -3,6 +3,7 @@ package com.klachkova.locationsystem.modeles;
 import com.klachkova.locationsystem.util.annotations.USAddress;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class Location {
 
     @Column(name = "name")
     @NotBlank(message = "Name should not be empty")
-    @Size(min = 3, max = 30, message = "Name should be between 3 and 30 characters")
+    @Size(min = 2, max = 30, message = "Name should be between 2 and 30 characters")
     private String name;
 
     @NotBlank(message = "Address should not be empty")
@@ -25,8 +26,8 @@ public class Location {
     private String address;
 
     @ManyToOne
-    @NotBlank
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @NotNull(message = "Owner should not be empty")
+    @JoinColumn(name = "userId", referencedColumnName = "id")
     private User owner;
 
     @OneToMany

@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import java.util.List;
@@ -40,18 +39,21 @@ public class UserController {
 
     @PostMapping()
     public ResponseEntity<UserDTO> registerUser(@Valid @RequestBody UserDTO userDTO) {
-        User registeredUser = userConverter.convertToEntity(userDTO);
-        userService.registerUser(registeredUser);
-        return new ResponseEntity<>(userConverter.convertToDto(registeredUser), HttpStatus.CREATED);
+        User userToRegister = userConverter.convertToEntity(userDTO);
+        User registeredUser = userService.registerUser(userToRegister);
+        UserDTO registeredUserDTO = userConverter.convertToDto(registeredUser);
+        return new ResponseEntity<>(registeredUserDTO, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}/availableLocations") //own+shared with user
-    public ResponseEntity<List<LocationDTO>> getAvailableLocations(@PathVariable int id) {
-        List<Location> sharedLocations = locationService.getAllSharedLocations(userService.findById(id));
-        List<LocationDTO> locationDTO = sharedLocations.stream()
-                .map(locationConverter::convertToDto)
+    public ResponseEntity<List<List<LocationDTO>>> getAvailableLocations(@PathVariable int id) {
+        List<List<Location>> availableLocations = locationService.getAvailableLocations(id);
+        List<List<LocationDTO>> locationDTOs = availableLocations.stream()
+                .map(locationList -> locationList.stream()
+                        .map(locationConverter::convertToDto)
+                        .collect(Collectors.toList()))
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(locationDTO, HttpStatus.OK);
+        return new ResponseEntity<>(locationDTOs, HttpStatus.OK);
     }
 
 

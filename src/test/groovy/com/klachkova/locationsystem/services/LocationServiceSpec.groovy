@@ -3,6 +3,7 @@ package com.klachkova.locationsystem.services
 import com.klachkova.locationsystem.modeles.Location
 import com.klachkova.locationsystem.modeles.User
 import com.klachkova.locationsystem.repositories.LocationRepository
+import com.klachkova.locationsystem.repositories.UserRepository
 import com.klachkova.locationsystem.util.NotCreatedException
 import spock.lang.Specification
 import spock.lang.Subject
@@ -12,10 +13,10 @@ class LocationServiceSpec extends Specification {
 
     LocationRepository locationRepository = Mock()
     LocationAccessService locationAccessService = Mock()
-    UserService userService = Mock()
+    UserRepository userRepository = Mock()
 
     @Subject
-    LocationService locationService = new LocationService(locationRepository, locationAccessService, userService)
+    LocationService locationService = new LocationService(locationRepository, locationAccessService, userRepository)
 
 
     def "test registerLocation saves location"() {
@@ -27,7 +28,7 @@ class LocationServiceSpec extends Specification {
         def location = new Location(address: locationAddress, owner: user)
 
         and:
-        userService.existsByEmail(email) >> true
+        userRepository.existsByEmail(email) >> true
         locationRepository.existsByAddress(location.getAddress()) >> false
 
         when:
@@ -44,7 +45,7 @@ class LocationServiceSpec extends Specification {
         def location = new Location(owner: user)
 
         and:
-        userService.existsByEmail(email) >> false
+        userRepository.existsByEmail(email) >> false
 
         when:
         locationService.registerLocation(location)
@@ -61,7 +62,7 @@ class LocationServiceSpec extends Specification {
         def location = new Location(address: locationAddress, owner: owner)
 
         and:
-        userService.existsByEmail(email) >> true
+        userRepository.existsByEmail(email) >> true
         locationRepository.existsByAddress(locationAddress) >> true
 
         when:
@@ -149,24 +150,27 @@ class LocationServiceSpec extends Specification {
         "456 False St" | false
     }
 
-    def "test getAllSharedLocations should return shared locations for user"() {
+    def "getAvailableLocations returns list of own and shared locations"() {
         given:
-        def user = new User()
-        def location1 = new Location()
-        def location2 = new Location()
+        def userId = 1
+        def user = new User(id: userId)
+        def user1 = new User()
+        def ownLocations = [new Location(id: 1, owner: user), new Location(id: 2, owner: user)]
+        def sharedLocations = [new Location(id: 3, owner: user1), new Location(id: 4, owner: user1)]
 
         and:
-        locationAccessService.getAllSharedLocations(user) >> [location1, location2]
+        userRepository.findById(userId) >> Optional.of(user)
+        locationRepository.findAllByOwner(user) >> ownLocations
+        locationAccessService.getAllSharedLocations(user) >> sharedLocations
 
         when:
-        def result = locationService.getAllSharedLocations(user)
+        def result = locationService.getAvailableLocations(userId)
 
-        then:
+        then: "The result contains both own and shared locations"
         result.size() == 2
-        result.contains(location1)
-        result.contains(location2)
+        result[0] == ownLocations
+        result[1] == sharedLocations
     }
-
 
     def "test getFriendsToLocation should return users with access to the location"() {
         given:

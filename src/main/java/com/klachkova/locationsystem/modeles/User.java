@@ -16,7 +16,7 @@ public class User implements Serializable {
 
     @Column(name = "name")
     @NotBlank(message = "Name should not be empty")
-    @Size(min = 3, max = 30, message = "Name should be between 3 and 30 characters")
+    @Size(min = 2, max = 30, message = "Name should be between 2 and 30 characters")
     private String name;
 
     @Email(message = "Email should be valid")
@@ -32,6 +32,10 @@ public class User implements Serializable {
     public User(String name, String email) {
         this.name = name;
         this.email = email;
+    }
+
+    public Integer getId() {
+        return id;
     }
 
     public void setId(Integer id) {

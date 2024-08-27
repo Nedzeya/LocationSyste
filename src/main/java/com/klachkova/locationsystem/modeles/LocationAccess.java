@@ -3,6 +3,7 @@ package com.klachkova.locationsystem.modeles;
 import com.klachkova.locationsystem.util.annotations.ValidAccessLevel;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "LocationAccess")
@@ -13,17 +14,17 @@ public class LocationAccess {
     private Integer id;
 
     @ManyToOne
-    @NotBlank (message = "User should not be empty")
+    @NotNull(message = "User should not be empty")
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
     @ManyToOne
-    @NotBlank (message = "Location should not be empty")
+    @NotNull (message = "Location should not be empty")
     @JoinColumn(name = "location_id", referencedColumnName = "id")
     private Location location;
 
     @Enumerated(EnumType.STRING)
-    @NotBlank(message = "Access level cannot be empty")
+    @NotNull(message = "Access level cannot be empty")
     @ValidAccessLevel (message = "Invalid access level. It should be READ_ONLY or ADMIN")
     private AccessLevel accessLevel;
 

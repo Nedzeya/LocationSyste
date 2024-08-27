@@ -2,12 +2,13 @@ package com.klachkova.locationsystem.services;
 
 import com.klachkova.locationsystem.modeles.*;
 import com.klachkova.locationsystem.repositories.LocationRepository;
+import com.klachkova.locationsystem.repositories.UserRepository;
 import com.klachkova.locationsystem.util.NotCreatedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.NoSuchElementException;
+
+import java.util.*;
 
 
 @Service
@@ -16,20 +17,20 @@ public class LocationService {
 
     private final LocationRepository locationRepository;
     private final LocationAccessService locationAccessService;
-    private final UserService userService;
+    private final UserRepository userRepository;
 
     @Autowired
     public LocationService(LocationRepository locationRepository,
                            LocationAccessService locationAccessService,
-                           UserService userService) {
+                           UserRepository userRepository) {
         this.locationRepository = locationRepository;
         this.locationAccessService = locationAccessService;
-        this.userService = userService;
+        this.userRepository = userRepository;
     }
 
     @Transactional
     public void registerLocation(Location location) {
-        if (!userService.existsByEmail(location.getOwner().getEmail())) {
+        if (!userRepository.existsByEmail(location.getOwner().getEmail())) {
             throw new NotCreatedException("No such user in the database");
         }
         if (existsByAddress(location.getAddress())) {
@@ -52,11 +53,18 @@ public class LocationService {
         return locationRepository.existsByAddress(address);
     }
 
-    public List<Location> getAllSharedLocations(User user) {
-        return locationAccessService.getAllSharedLocations(user);
+    public List<List<Location>> getAvailableLocations(int userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + userId));
+        List<Location> allOwnLocations = locationRepository.findAllByOwner(user);
+        List<Location> allSharedLocations = locationAccessService.getAllSharedLocations(user);
+        return Arrays.asList(allOwnLocations, allSharedLocations);
     }
 
     public List<User> getFriendsToLocation(int locationId) {
-        return locationAccessService.getFriends (locationId);
+
+        return locationAccessService.getFriends(locationId);
     }
+
+
 }

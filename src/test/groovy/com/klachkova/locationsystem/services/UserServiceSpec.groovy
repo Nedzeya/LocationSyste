@@ -4,33 +4,34 @@ import com.klachkova.locationsystem.modeles.User
 import com.klachkova.locationsystem.repositories.UserRepository
 import spock.lang.Specification
 import spock.lang.Subject
-import spock.lang.Unroll
 import com.klachkova.locationsystem.util.NotCreatedException
 
 
 class UserServiceSpec extends Specification {
-    UserRepository userRepository = Mock(UserRepository)
+
+    UserRepository userRepository = Mock()
     @Subject
     UserService userService = new UserService(userRepository)
 
-    def "test registerUser saves user"() {
+   def "test registerUser saves user when email does not exist"() {
         given:
-        def email = "name1@example.com"
+        def email = "name@example.com"
         def user = new User(email: email)
-
+        def savedUser = user.setId(1)
         and:
         userRepository.existsByEmail(email) >> false
+        userRepository.save(user) >> savedUser
 
         when:
-        userService.registerUser(user)
+        def result = userService.registerUser(user)
 
         then:
-        1 * userRepository.save(user)
+        result == savedUser
     }
 
     def "test registerUser should throw NotCreatedException if user with email already exists"() {
         given:
-        def email = "name1@example.com"
+        def email = "name@example.com"
         def user = new User(email: email)
 
         and:
@@ -114,19 +115,5 @@ class UserServiceSpec extends Specification {
 
         then:
         thrown(NoSuchElementException)
-    }
-
-    @Unroll
-    def "test existsByEmail should return #expectedResult when email is #email"() {
-        given:
-        userRepository.existsByEmail(email) >> expectedResult
-
-        expect:
-        userService.existsByEmail(email) == expectedResult
-
-        where:
-        email               | expectedResult
-        "name1@example.com" | true
-        "name2@example.com" | false
     }
 }

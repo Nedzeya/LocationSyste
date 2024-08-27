@@ -22,11 +22,13 @@ public class UserService {
     }
 
     @Transactional
-    public void registerUser(User user) {
-        if (existsByEmail(user.getEmail())) {
+    public User registerUser(User user) {
+        String email = user.getEmail();
+        if (userRepository.existsByEmail(email)) {
             throw new NotCreatedException("User with this email already exists.");
-        }
-        userRepository.save(user);
+                   }
+        User savedUser = userRepository.save(user);
+        return savedUser;
     }
 
     public List<User> findAll() {
@@ -41,10 +43,6 @@ public class UserService {
     public User findByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException("User with email " + email + " not found"));
-    }
-
-    public boolean existsByEmail(String email) {
-        return userRepository.existsByEmail(email);
     }
 }
 
