@@ -3,72 +3,84 @@ package com.klachkova.locationsystem.controllers;
 import com.klachkova.locationsystem.dto.*;
 import com.klachkova.locationsystem.modeles.*;
 import com.klachkova.locationsystem.services.*;
-import com.klachkova.locationsystem.util.annotations.ValidAccessLevel;
 import com.klachkova.locationsystem.util.converters.*;
+import com.klachkova.locationsystem.util.exceptions.ApplicationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import javax.validation.Valid;
-import javax.validation.constraints.Email;
+
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/locations")
 public class LocationController {
 
     private final LocationService locationService;
-    private final LocationConverter locationConverter;
     private final LocationAccessService locationAccessService;
-    private final UserConverter userConverter;
-
 
     @Autowired
     public LocationController(LocationService locationService,
-                              LocationConverter locationConverter,
-                              LocationAccessService locationAccessService,
-                              UserConverter userConverter) {
+                              LocationAccessService locationAccessService) {
         this.locationService = locationService;
-        this.locationConverter = locationConverter;
         this.locationAccessService = locationAccessService;
-        this.userConverter = userConverter;
     }
 
     @PostMapping()
-    public ResponseEntity<LocationDTO> registerLocation(@Valid @RequestBody LocationDTO locationDTO) {
-        Location registeredLocation = locationConverter.convertToEntity(locationDTO);
-        locationService.registerLocation(registeredLocation);
-        return new ResponseEntity<>(locationConverter.convertToDto(registeredLocation), HttpStatus.CREATED);
+    public ResponseEntity<?> registerLocation(@RequestBody LocationDTO locationDTO) {
+        try {
+            LocationDTO registeredLocationDTO = locationService.registerLocation(locationDTO);
+            return new ResponseEntity<>(registeredLocationDTO, HttpStatus.CREATED);
+        } catch (ApplicationException e) {
+            return new ResponseEntity<>(e.getMessage(), e.getStatus());
+        } catch (Exception e) {
+            return new ResponseEntity<>("An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/{id}/share")
     public ResponseEntity<String> shareLocation(@PathVariable("id") int id,
-                                                @RequestParam("userEmail") @Email String userEmail,
-                                                @RequestParam("accessLevel") @ValidAccessLevel AccessLevel accessLevel) {
-        locationAccessService.shareLocation(id, userEmail, accessLevel);
-        return ResponseEntity.ok("Location shared successfully");
+                                                @RequestParam("userEmail") String userEmail,
+                                                @RequestParam("accessLevel") AccessLevel accessLevel) {
+        try {
+            locationAccessService.shareLocation(id, userEmail, accessLevel);
+            return ResponseEntity.ok("Location shared successfully");
+        } catch (ApplicationException e) {
+            return new ResponseEntity<>(e.getMessage(), e.getStatus());
+        } catch (Exception e) {
+            return new ResponseEntity<>("An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 
     @PatchMapping("/{id}/access")
     public ResponseEntity<String> updateAccessLevel(@PathVariable("id") int locationId,
-                                                    @RequestParam("userEmail") @Email String userEmail,
-                                                    @RequestParam("accessLevel") @ValidAccessLevel AccessLevel accessLevel) {
-        locationAccessService.updateLocationAccessByAccessLevel(locationId, userEmail, accessLevel);
-        return ResponseEntity.ok("Access level updated successfully.");
+                                                    @RequestParam("userEmail") String userEmail,
+                                                    @RequestParam("accessLevel") AccessLevel accessLevel) {
+        try {
+            locationAccessService.updateLocationAccessByAccessLevel(locationId, userEmail, accessLevel);
+            return ResponseEntity.ok("Access level updated successfully.");
+        } catch (ApplicationException e) {
+            return new ResponseEntity<>(e.getMessage(), e.getStatus());
+        } catch (Exception e) {
+            return new ResponseEntity<>("An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
+
     @GetMapping("{id}/friends") //all friend users on the location
-    public ResponseEntity<List<UserDTO>> getAllFriendUsers (@PathVariable("id") int id) {
-        List<UserDTO> friends = locationService.getFriendsToLocation(id)
-                .stream()
-                .map(userConverter::convertToDto)
-                .collect(Collectors.toList());
-        if (friends.isEmpty()) {
-            return new ResponseEntity<>(friends, HttpStatus.NO_CONTENT);
+    public ResponseEntity<?> getAllFriendUsers(@PathVariable("id") int id) {
+        try {
+            List<UserDTO> friends = locationService.getFriendsToLocation(id);
+            if (friends.isEmpty()) {
+                return new ResponseEntity<>(friends, HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(friends, HttpStatus.OK);
+        } catch (ApplicationException e) {
+            return new ResponseEntity<>(e.getMessage(), e.getStatus());
+        } catch (Exception e) {
+            return new ResponseEntity<>("An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(friends, HttpStatus.OK);
     }
 }
 

@@ -3,12 +3,12 @@ package com.klachkova.locationsystem.util.validators;
 import com.klachkova.locationsystem.modeles.AccessLevel;
 import com.klachkova.locationsystem.util.annotations.ValidAccessLevel;
 import org.springframework.stereotype.Component;
-
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 @Component
-public class AccessLevelValidator implements ConstraintValidator<ValidAccessLevel, AccessLevel> {
+public class AccessLevelValidator implements ConstraintValidator<ValidAccessLevel,AccessLevel> {
+
     @Override
     public void initialize(ValidAccessLevel constraintAnnotation) {
     }
@@ -21,6 +21,8 @@ public class AccessLevelValidator implements ConstraintValidator<ValidAccessLeve
                     .disableDefaultConstraintViolation();
             return false;
         }
+
+        // AccessLevel is an enum, so this check is redundant, but kept for completeness
         try {
             AccessLevel.valueOf(value.name());
             return true;

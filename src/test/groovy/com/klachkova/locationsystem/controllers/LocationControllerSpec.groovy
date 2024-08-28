@@ -3,12 +3,8 @@ package com.klachkova.locationsystem.controllers
 import com.klachkova.locationsystem.dto.LocationDTO
 import com.klachkova.locationsystem.dto.UserDTO
 import com.klachkova.locationsystem.modeles.AccessLevel
-import com.klachkova.locationsystem.modeles.Location
-import com.klachkova.locationsystem.modeles.User
 import com.klachkova.locationsystem.services.LocationAccessService
 import com.klachkova.locationsystem.services.LocationService
-import com.klachkova.locationsystem.util.converters.LocationConverter
-import com.klachkova.locationsystem.util.converters.UserConverter
 import org.springframework.http.HttpStatus
 import spock.lang.Specification
 import spock.lang.Subject
@@ -16,28 +12,20 @@ import spock.lang.Subject
 class LocationControllerSpec extends Specification {
 
     LocationService locationService = Mock()
-    LocationConverter locationConverter = Mock()
     LocationAccessService locationAccessService = Mock()
-    UserConverter userConverter = Mock()
 
     @Subject
     def locationController = new LocationController(
             locationService,
-            locationConverter,
-            locationAccessService,
-            userConverter
+            locationAccessService
     )
 
     def "test registerLocation should return CREATED status and LocationDTO"() {
         given:
         def locationDTO = new LocationDTO()
-        def location = new Location()
-        def registeredLocation = location.setId(1)
 
         and:
-        locationConverter.convertToEntity(locationDTO) >> location
-        locationService.registerLocation(location) >> registeredLocation
-        locationConverter.convertToDto(location) >> locationDTO
+        locationService.registerLocation(locationDTO) >> locationDTO
 
         when:
         def response = locationController.registerLocation(locationDTO)
@@ -78,18 +66,14 @@ class LocationControllerSpec extends Specification {
     def "test getAllFriendUsers should return OK status and list of UserDTOs if there are friends"() {
         given:
         def locationId = 1
-        def user1  = new User ()
-        def user2 = new User()
         def userDTO1 = new UserDTO()
         def userDTO2 = new UserDTO()
 
         and:
-        locationService.getFriendsToLocation(locationId) >> [user1, user2]
-        userConverter.convertToDto(user1) >> userDTO1
-        userConverter.convertToDto(user2) >> userDTO2
+        locationService.getFriendsToLocation(locationId) >> [userDTO1, userDTO2]
 
         when:
-       def response = locationController.getAllFriendUsers(locationId)
+        def response = locationController.getAllFriendUsers(locationId)
 
         then:
         response.statusCode == HttpStatus.OK
@@ -112,6 +96,5 @@ class LocationControllerSpec extends Specification {
         response.statusCode == HttpStatus.NO_CONTENT
         response.body.size() == 0
     }
-
 }
 

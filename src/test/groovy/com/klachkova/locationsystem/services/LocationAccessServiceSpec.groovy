@@ -5,23 +5,24 @@ import com.klachkova.locationsystem.modeles.Location
 import com.klachkova.locationsystem.modeles.LocationAccess
 import com.klachkova.locationsystem.modeles.User
 import com.klachkova.locationsystem.repositories.LocationAccessRepository
-import org.springframework.beans.factory.annotation.Autowired
+import com.klachkova.locationsystem.util.exceptions.NotFoundException
+import com.klachkova.locationsystem.util.exceptions.PermissionDeniedException
+import com.klachkova.locationsystem.util.exceptions.ValidationException
 import spock.lang.Specification
 import spock.lang.Subject
 
+import javax.validation.ConstraintViolation
+import javax.validation.Validator
+
 class LocationAccessServiceSpec extends Specification {
 
-    @Autowired
     LocationAccessRepository locationAccessRepository = Mock(LocationAccessRepository)
-
-    @Autowired
     UserService userService = Mock(UserService)
-
-    @Autowired
     LocationService locationService = Mock(LocationService)
+    Validator validator = Mock()
 
     @Subject
-    LocationAccessService locationAccessService = new LocationAccessService(locationAccessRepository, userService, locationService)
+    LocationAccessService locationAccessService = new LocationAccessService(locationAccessRepository, userService, locationService, validator)
 
     def "test getAllSharedLocations returns shared locations for a user"() {
         given:
@@ -32,7 +33,7 @@ class LocationAccessServiceSpec extends Specification {
         def locationAccess2 = new LocationAccess(user: user, location: location2)
 
         and:
-        locationAccessRepository.findByUser(user) >> [locationAccess1, locationAccess2]
+               locationAccessRepository.findByUser(user) >> [locationAccess1, locationAccess2]
 
         when:
         def result = locationAccessService.getAllSharedLocations(user)
@@ -47,13 +48,17 @@ class LocationAccessServiceSpec extends Specification {
         given:
         def friendEmail = "name@example.com"
         def friend = new User(email: friendEmail)
-        def location = new Location(id: 1)
+        def locationId =1
+        def location = new Location(id: locationId)
         def accessLevel = AccessLevel.READ_ONLY
 
         when:
-        locationAccessService.shareLocation(1, friendEmail, accessLevel)
+        validator.validate(_ as LocationAccess) >> []
+        locationAccessService.shareLocation(locationId, friendEmail, accessLevel)
 
         then:
+        1 * userService.findByEmail(friendEmail) >> friend
+        1 * locationService.findById(locationId) >> location
         1 * locationAccessRepository.save(_ as LocationAccess)
     }
 
@@ -61,53 +66,57 @@ class LocationAccessServiceSpec extends Specification {
         given:
         def email = "name@example.com"
         def friend = new User(email: email)
-        def location = new Location(id: 1)
+        def locationId =1
+        def location = new Location(id: locationId)
         def locationAccess = new LocationAccess(user: friend, location: location, accessLevel: AccessLevel.READ_ONLY)
 
         and:
+        validator.validate(_ as LocationAccess) >> []
         userService.findByEmail(email) >> friend
-        locationService.findById(1) >> location
+        locationService.findById(locationId) >> location
         locationAccessRepository.findByLocationAndUser(location, friend) >> Optional.of(locationAccess)
 
         when:
-        locationAccessService.updateLocationAccessByAccessLevel(1, email, AccessLevel.ADMIN)
+        locationAccessService.updateLocationAccessByAccessLevel(locationId, email, AccessLevel.ADMIN)
 
         then:
         locationAccess.accessLevel == AccessLevel.ADMIN
         1 * locationAccessRepository.save(locationAccess)
     }
 
-    def "test updateLocationAccessByAccessLevel throws NoSuchElementException if no LocationAccess found"() {
+    def "test updateLocationAccessByAccessLevel throws NotFoundException if no LocationAccess found"() {
         given:
         def email = "name@example.com"
-        def friend = new User(id: 1, email: email)
-        def location = new Location(id: 1)
+        def friend = new User(email: email)
+        def locationId =1
+        def location = new Location(id:locationId)
 
         and:
         userService.findByEmail(email) >> friend
-        locationService.findById(location.id) >> location
+        locationService.findById(locationId) >> location
         locationAccessRepository.findByLocationAndUser(location, friend) >> Optional.empty()
 
         when:
-        locationAccessService.updateLocationAccessByAccessLevel(1, email, AccessLevel.ADMIN)
+        locationAccessService.updateLocationAccessByAccessLevel(locationId, email, AccessLevel.ADMIN)
 
         then:
-        thrown(NoSuchElementException)
+        thrown(NotFoundException)
     }
 
     def "test getFriends returns list of users with access to location"() {
         given:
         def friend1 = new User()
         def friend2 = new User()
-        def location = new Location(id: 1)
+        def locationId =1
+        def location = new Location(id:locationId)
         def access1 = new LocationAccess(user: friend1, location: location)
         def access2 = new LocationAccess(user: friend2, location: location)
 
         and:
-        locationAccessRepository.findByLocationId(1) >> [access1, access2]
+        locationAccessRepository.findByLocationId(locationId) >> [access1, access2]
 
         when:
-        def result = locationAccessService.getFriends(1)
+        def result = locationAccessService.getFriends(locationId)
 
         then:
         result.size() == 2
@@ -117,7 +126,8 @@ class LocationAccessServiceSpec extends Specification {
 
     def "test addFriendToLocation adds a friend if user has ADMIN access"() {
         given:
-        def user = new User(id: 1)
+        def userId =1
+        def user = new User(id: userId)
         def friendEmail = "name2@example.com"
         def friend = new User(email: friendEmail)
         def locationAddress = "123 Main St, Springfield, IL, 62704"
@@ -125,23 +135,24 @@ class LocationAccessServiceSpec extends Specification {
         def adminAccess = new LocationAccess(user: user, location: location, accessLevel: AccessLevel.ADMIN)
 
         and:
-        userService.findById(1) >> user
+        validator.validate(_ as LocationAccess) >> []
+        userService.findById(userId) >> user
         userService.findByEmail(friendEmail) >> friend
-        locationService.findByAddress(location.address) >> location
+        locationService.findByAddress(locationAddress) >> location
         locationAccessRepository.findByLocationAndUser(location, user) >> Optional.of(adminAccess)
 
         when:
-        locationAccessService.addFriendToLocation(1, friendEmail, locationAddress, AccessLevel.READ_ONLY)
+        locationAccessService.addFriendToLocation(userId, friendEmail, locationAddress, AccessLevel.READ_ONLY)
 
         then:
         1 * locationAccessRepository.save(_ as LocationAccess)
     }
 
-    def "test addFriendToLocation throws SecurityException if user does not have ADMIN access"() {
+    def "test addFriendToLocation throws PermissionDeniedException if user does not have ADMIN access"() {
         given:
         def user = new User(id: 1)
         def friendEmail = "name2@example.com"
-        def friend= new User(email: friendEmail)
+        def friend = new User(email: friendEmail)
         def locationAddress = "123 Main St, Springfield, IL, 62704"
         def location = new Location(address: locationAddress)
         def readAccess = new LocationAccess(user: user, location: location, accessLevel: AccessLevel.READ_ONLY)
@@ -149,13 +160,29 @@ class LocationAccessServiceSpec extends Specification {
         and:
         userService.findById(1) >> user
         userService.findByEmail(friendEmail) >> friend
-        locationService.findByAddress(location.address) >> location
+        locationService.findByAddress(locationAddress) >> location
         locationAccessRepository.findByLocationAndUser(location, user) >> Optional.of(readAccess)
 
         when:
         locationAccessService.addFriendToLocation(1, friendEmail, locationAddress, AccessLevel.READ_ONLY)
 
         then:
-        thrown(SecurityException)
+        thrown(PermissionDeniedException)
+    }
+
+    def "test validateLocationAccess throws ValidationException for invalid LocationAccess"() {
+        given:
+        def invalidLocationAccess = new LocationAccess() // Assuming this LocationAccess instance is invalid
+        def violation = Mock(ConstraintViolation)
+        violation.getMessage() >> "Invalid locationAccess"
+
+        and:
+        validator.validate(invalidLocationAccess) >> [violation]
+
+        when:
+        locationAccessService.validateLocationAccess(invalidLocationAccess)
+
+        then:
+        thrown(ValidationException)
     }
 }

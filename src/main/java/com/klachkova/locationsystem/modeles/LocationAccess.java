@@ -2,7 +2,6 @@ package com.klachkova.locationsystem.modeles;
 
 import com.klachkova.locationsystem.util.annotations.ValidAccessLevel;
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Entity
@@ -24,8 +23,8 @@ public class LocationAccess {
     private Location location;
 
     @Enumerated(EnumType.STRING)
-    @NotNull(message = "Access level cannot be empty")
-    @ValidAccessLevel (message = "Invalid access level. It should be READ_ONLY or ADMIN")
+    @NotNull(message = "Access level must not be null")
+    @ValidAccessLevel
     private AccessLevel accessLevel;
 
     public LocationAccess() {
@@ -37,6 +36,13 @@ public class LocationAccess {
         this.accessLevel = accessLevel;
     }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public User getUser() {
         return user;
