@@ -75,7 +75,7 @@ dependencies {
 
     integrationTestImplementation 'com.h2database:h2'
     integrationTestImplementation 'org.springframework.boot:spring-boot-starter-test'
-   // integrationTestImplementation 'org.apache.httpcomponents:httpclient:4.5.13'
+    integrationTestImplementation 'org.apache.httpcomponents:httpclient:4.5.13'
 }
 
 task integrationTest(type: Test) {

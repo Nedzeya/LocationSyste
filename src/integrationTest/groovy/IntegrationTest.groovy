@@ -1,6 +1,9 @@
 import spock.lang.Specification
 import spock.lang.Stepwise
-
+import org.apache.http.HttpResponse
+import org.apache.http.client.methods.HttpPatch
+import org.apache.http.impl.client.CloseableHttpClient
+import org.apache.http.impl.client.HttpClients
 
 @Stepwise
 
@@ -76,6 +79,21 @@ class IntegrationTest extends Specification {
 
         then: "Should return the list of friends"
         connection.responseCode == HttpURLConnection.HTTP_OK
+    }
+
+    def "Manage access for friend user on the location"() {
+        when: "Manage access for a friend user"
+        CloseableHttpClient client = HttpClients.createDefault()
+        HttpPatch httpPatch = new HttpPatch("${BASE_URL}/api/locations/1/access?userEmail=friend@example.com&accessLevel=ADMIN")
+        httpPatch.setHeader("Content-Type", "application/json")
+
+        HttpResponse response = client.execute(httpPatch)
+
+        then: "Access should be updated successfully"
+        response.statusLine.statusCode == 200
+
+        cleanup:
+        client.close()
     }
 
     def "Get all locations available for user"() {
