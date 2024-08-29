@@ -31,9 +31,10 @@ public class LocationService {
     private final LocationAccessService locationAccessService;
     private final Validator validator;
 
+    @Autowired
     public LocationService(UserRepository userRepository,
                            UserConverter userConverter,
-                           LocationRepository locationRepository,
+                           com.klachkova.locationsystem.repositories.LocationRepository locationRepository,
                            LocationConverter locationConverter,
                            LocationAccessService locationAccessService,
                            Validator validator) {
@@ -45,16 +46,13 @@ public class LocationService {
         this.validator = validator;
     }
 
-    @Autowired
-
-
     @Transactional
     public LocationDTO registerLocation(LocationDTO locationDTO) {
         Location locationToRegister = locationConverter.convertToEntity(locationDTO);
         validateLocation(locationToRegister);
-        if (!userRepository.existsByEmail(locationToRegister.getOwner().getEmail())) {
-            throw new NotCreatedException("No such user in the database");
-        }
+        User existingUser = userRepository.findByEmail(locationDTO.getOwner().getEmail())
+                .orElseThrow(() -> new NotCreatedException("No such user in the database"));
+        locationToRegister.setOwner(existingUser);
         if (existsByAddress(locationToRegister.getAddress())) {
             throw new NotCreatedException("Location with that address already exists");
         }

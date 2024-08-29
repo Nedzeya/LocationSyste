@@ -5,6 +5,7 @@ import com.klachkova.locationsystem.modeles.Location;
 import com.klachkova.locationsystem.modeles.LocationAccess;
 import com.klachkova.locationsystem.modeles.User;
 import com.klachkova.locationsystem.repositories.LocationAccessRepository;
+import com.klachkova.locationsystem.repositories.LocationRepository;
 import com.klachkova.locationsystem.util.exceptions.NotFoundException;
 import com.klachkova.locationsystem.util.exceptions.PermissionDeniedException;
 import com.klachkova.locationsystem.util.exceptions.ValidationException;
@@ -23,16 +24,17 @@ public class LocationAccessService {
 
     private final LocationAccessRepository locationAccessRepository;
     private final UserService userService;
-    private final LocationService locationService;
+    private final LocationRepository locationRepository;
     private final Validator validator;
 
     @Autowired
     public LocationAccessService(LocationAccessRepository locationAccessRepository,
                                  UserService userService,
-                                 LocationService locationService, Validator validator) {
+                                 LocationRepository locationRepository,
+                                 Validator validator) {
         this.locationAccessRepository = locationAccessRepository;
         this.userService = userService;
-        this.locationService = locationService;
+        this.locationRepository = locationRepository;
         this.validator = validator;
     }
 
@@ -47,18 +49,18 @@ public class LocationAccessService {
     @Transactional
     public void shareLocation(int locationId, String userEmail, AccessLevel accessLevel) {
         User user = userService.findByEmail(userEmail);
-        Location location = locationService.findById(locationId);
-
-        validateLocationAccess(new LocationAccess(user, location, accessLevel));
-
-        locationAccessRepository.save(new LocationAccess(user, location, accessLevel));
+        Location location = locationRepository.findById(locationId)
+                .orElseThrow( () -> new NotFoundException("Location with ID " + locationId + " not found"));
+        LocationAccess locationAccessToSave = new LocationAccess(user, location, accessLevel);
+                validateLocationAccess(locationAccessToSave);
+        locationAccessRepository.save(locationAccessToSave);
     }
 
     @Transactional
     public void updateLocationAccessByAccessLevel(int locationId, String userEmail, AccessLevel accessLevel) {
         User user = userService.findByEmail(userEmail);
-        Location location = locationService.findById(locationId);
-
+        Location location = locationRepository.findById(locationId)
+                .orElseThrow( () -> new NotFoundException("Location with ID " + locationId + " not found"));;
         LocationAccess locationAccess = locationAccessRepository.findByLocationAndUser(location, user)
                 .orElseThrow(() -> new NotFoundException("LocationAccess with locationID " + locationId + " and userEmail " + userEmail + " not found"));
 
@@ -78,7 +80,8 @@ public class LocationAccessService {
     @Transactional
     public void addFriendToLocation(int userId, String friendEmail, String locationAddress, AccessLevel accessLevel) {
         User friendUser = userService.findByEmail(friendEmail);
-        Location location = locationService.findByAddress(locationAddress);
+        Location location = locationRepository.findByAddress(locationAddress)
+                .orElseThrow(() -> new NotFoundException("Location with address " + locationAddress + " not found"));
 
         LocationAccess adminAccess = locationAccessRepository.findByLocationAndUser(location, userService.findById(userId))
                 .orElseThrow(() -> new NotFoundException(

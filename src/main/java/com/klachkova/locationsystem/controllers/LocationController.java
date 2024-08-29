@@ -3,7 +3,6 @@ package com.klachkova.locationsystem.controllers;
 import com.klachkova.locationsystem.dto.*;
 import com.klachkova.locationsystem.modeles.*;
 import com.klachkova.locationsystem.services.*;
-import com.klachkova.locationsystem.util.converters.*;
 import com.klachkova.locationsystem.util.exceptions.ApplicationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,27 +38,30 @@ public class LocationController {
     }
 
     @PostMapping("/{id}/share")
-    public ResponseEntity<String> shareLocation(@PathVariable("id") int id,
+    public ResponseEntity<?> shareLocation(@PathVariable("id") int id,
                                                 @RequestParam("userEmail") String userEmail,
                                                 @RequestParam("accessLevel") AccessLevel accessLevel) {
         try {
-            locationAccessService.shareLocation(id, userEmail, accessLevel);
-            return ResponseEntity.ok("Location shared successfully");
-        } catch (ApplicationException e) {
-            return new ResponseEntity<>(e.getMessage(), e.getStatus());
-        } catch (Exception e) {
+            System.out.println("locationController sharing " + id + userEmail + accessLevel);
+          locationAccessService.shareLocation(id, userEmail, accessLevel);
+            return new ResponseEntity<>("Location shared successfully", HttpStatus.OK);
+       } catch (ApplicationException e) {
+          return new ResponseEntity<>(e.getMessage(), e.getStatus());
+       } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>("An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+       }
     }
 
 
     @PatchMapping("/{id}/access")
     public ResponseEntity<String> updateAccessLevel(@PathVariable("id") int locationId,
                                                     @RequestParam("userEmail") String userEmail,
-                                                    @RequestParam("accessLevel") AccessLevel accessLevel) {
+                                                    @RequestParam("accessLevel") AccessLevel accessLevel
+    ) {
         try {
             locationAccessService.updateLocationAccessByAccessLevel(locationId, userEmail, accessLevel);
-            return ResponseEntity.ok("Access level updated successfully.");
+            return new ResponseEntity<>("Access level updated successfully.", HttpStatus.OK);
         } catch (ApplicationException e) {
             return new ResponseEntity<>(e.getMessage(), e.getStatus());
         } catch (Exception e) {

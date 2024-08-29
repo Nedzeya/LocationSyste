@@ -3,52 +3,113 @@ plugins {
     id 'groovy'
     id 'org.springframework.boot' version '2.6.4'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'jacoco'
 }
 
-group 'com.klachkova'
+group 'com.klachkova.locationsystem'
 version '1.0-SNAPSHOT'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
 }
+jacoco {
+    toolVersion = "0.8.8"
+}
 
 repositories {
     mavenCentral()
 }
+sourceSets {
+    test {
+        groovy {
+            srcDir 'src/test/groovy'
+        }
+        resources {
+            srcDir 'src/test/resources'
+        }
+    }
+    integrationTest {
+        groovy {
+            srcDir 'src/integrationTest/groovy'
+        }
+        resources {
+            srcDir 'src/integrationTest/resources'
+        }
+    }
+}
+
+configurations {
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
 
 dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.6.4'
     implementation 'org.springframework.boot:spring-boot-starter-web:2.6.4'
+
     implementation 'javax.validation:validation-api:2.0.1.Final'
-    implementation 'org.modelmapper:modelmapper:2.4.5'
     implementation 'org.hibernate.validator:hibernate-validator:6.1.7.Final'
-
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-
-    runtimeOnly 'com.h2database:h2'
     implementation 'org.mapstruct:mapstruct:1.4.2.Final'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    runtimeOnly 'com.h2database:h2'
 
+    //testImplementation 'org.spockframework:spock-core:1.3-groovy-2.4'
+    //testImplementation 'org.spockframework:spock-spring:1.3-groovy-2.4'
+    //testImplementation 'org.codehaus.groovy:groovy-all:2.4.15'
     testImplementation 'org.spockframework:spock-core:2.0-groovy-3.0'
-   //testImplementation 'org.spockframework:spock-core:1.3-groovy-2.4'
-
-   // testImplementation 'org.spockframework:spock-spring:1.3-groovy-2.4'
-   testImplementation 'org.spockframework:spock-spring:2.0-groovy-3.0'
-
-   testImplementation 'org.codehaus.groovy:groovy-all:3.0.9'
-  //  testImplementation 'org.codehaus.groovy:groovy-all:2.4.15'
+    testImplementation 'org.spockframework:spock-spring:2.0-groovy-3.0'
+    testImplementation 'org.codehaus.groovy:groovy-all:3.0.9'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'com.h2database:h2'
+
+   // integrationTestImplementation 'org.spockframework:spock-core:1.3-groovy-2.4'
+   // integrationTestImplementation 'org.spockframework:spock-spring:1.3-groovy-2.4'
+   // integrationTestImplementation 'org.codehaus.groovy:groovy-all:2.4.15'
+    integrationTestImplementation 'org.spockframework:spock-core:2.0-groovy-3.0'
+    integrationTestImplementation 'org.spockframework:spock-spring:2.0-groovy-3.0'
+    integrationTestImplementation 'org.codehaus.groovy:groovy-all:3.0.9'
+
+    integrationTestImplementation 'com.h2database:h2'
+    integrationTestImplementation 'org.springframework.boot:spring-boot-starter-test'
+   // integrationTestImplementation 'org.apache.httpcomponents:httpclient:4.5.13'
+}
+
+task integrationTest(type: Test) {
+    description = 'Runs the integration tests.'
+    group = 'verification'
+    shouldRunAfter test
+
+    useJUnitPlatform()
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    reports {
+        html.enabled = true
+        junitXml.enabled = true
+    }
+}
+
+tasks.withType(Test) {
+    if (project.hasProperty('excludeIntegrationTests') && project.excludeIntegrationTests.toBoolean()) {
+        exclude '**/*IntegrationTest.class'
+    }
 }
 
 test {
     useJUnitPlatform()
     include '**/*Spec.*'
+    finalizedBy jacocoTestReport
 }
-
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.enabled true
+    }
+}
 wrapper {
     gradleVersion("6.8.3")
 }

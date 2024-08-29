@@ -42,18 +42,20 @@ class LocationServiceSpec extends Specification {
         def email = "owner@example.com"
         def address = "123 Main St, Springfield, IL, 62704"
         def locationDTO = new LocationDTO(name: "Location Name", address: address, owner: new UserDTO(name: "Owner", email: email))
-        def user = new User(name: "Owner", email: email)
+        def user = new User()
+        def userDTO = new UserDTO()
         def location = new Location(name: "Location Name", address: address, owner: user)
         def savedLocation = new Location(id: 1, name: "Location Name", address: address, owner: user)
-        def locationDTOAfterSave = new LocationDTO(name: "Location Name", address: address, owner: new UserDTO(name: "Owner", email: email))
+        def locationDTOAfterSave = new LocationDTO(name: "Location Name", address: address, owner: userDTO)
 
 
         and:
         locationConverter.convertToEntity(locationDTO) >> location
         validator.validate(location) >> []
-        userRepository.existsByEmail(email) >> true
+        userRepository.findByEmail(email) >> Optional.of(user)
         locationRepository.existsByAddress(address) >> false
         locationRepository.save(location) >> savedLocation
+        userConverter.convertToDto(user) >> userDTO
         locationConverter.convertToDto(savedLocation) >> locationDTOAfterSave
 
         when:
@@ -68,13 +70,13 @@ class LocationServiceSpec extends Specification {
         def email = "owner@example.com"
         def address = "123 Main St, Springfield, IL, 62704"
         def locationDTO = new LocationDTO(name: "Location Name", address: address, owner: new UserDTO(name: "Owner", email: email))
-        def user = new User(name: "Owner", email: email)
+        def user = new User()
         def location = new Location(name: "Location Name", address: address, owner: user)
 
         and:
         locationConverter.convertToEntity(locationDTO) >> location
         validator.validate(location) >> []
-        userRepository.existsByEmail(email) >> false
+        userRepository.findByEmail(email) >> Optional.empty()
 
         when:
         locationService.registerLocation(locationDTO)
@@ -94,7 +96,7 @@ class LocationServiceSpec extends Specification {
         and:
         locationConverter.convertToEntity(locationDTO) >> location
         validator.validate(location) >> []
-        userRepository.existsByEmail(email) >> true
+        userRepository.findByEmail(email) >> Optional.of(user)
         locationRepository.existsByAddress(address) >> true
 
         when:
@@ -232,6 +234,7 @@ class LocationServiceSpec extends Specification {
         result[0] == ownLocationDTOs
         result[1] == sharedLocationDTOs
     }
+
     def "test getAvailableLocations returns only shared locations when user has no own locations"() {
         given:
         def userId = 1

@@ -64,4 +64,14 @@ public class User {
     public void setLocations(List<Location> locations) {
         this.locations = locations;
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", locations=" + locations +
+                '}';
+    }
 }

@@ -5,6 +5,7 @@ import com.klachkova.locationsystem.modeles.Location
 import com.klachkova.locationsystem.modeles.LocationAccess
 import com.klachkova.locationsystem.modeles.User
 import com.klachkova.locationsystem.repositories.LocationAccessRepository
+import com.klachkova.locationsystem.repositories.LocationRepository
 import com.klachkova.locationsystem.util.exceptions.NotFoundException
 import com.klachkova.locationsystem.util.exceptions.PermissionDeniedException
 import com.klachkova.locationsystem.util.exceptions.ValidationException
@@ -18,11 +19,15 @@ class LocationAccessServiceSpec extends Specification {
 
     LocationAccessRepository locationAccessRepository = Mock(LocationAccessRepository)
     UserService userService = Mock(UserService)
-    LocationService locationService = Mock(LocationService)
+    LocationRepository locationRepository = Mock(LocationRepository)
     Validator validator = Mock()
 
     @Subject
-    LocationAccessService locationAccessService = new LocationAccessService(locationAccessRepository, userService, locationService, validator)
+    LocationAccessService locationAccessService = new LocationAccessService(
+            locationAccessRepository,
+            userService,
+            locationRepository,
+            validator)
 
     def "test getAllSharedLocations returns shared locations for a user"() {
         given:
@@ -58,7 +63,7 @@ class LocationAccessServiceSpec extends Specification {
 
         then:
         1 * userService.findByEmail(friendEmail) >> friend
-        1 * locationService.findById(locationId) >> location
+        1 * locationRepository.findById(locationId) >> Optional.of(location)
         1 * locationAccessRepository.save(_ as LocationAccess)
     }
 
@@ -73,7 +78,7 @@ class LocationAccessServiceSpec extends Specification {
         and:
         validator.validate(_ as LocationAccess) >> []
         userService.findByEmail(email) >> friend
-        locationService.findById(locationId) >> location
+        locationRepository.findById(locationId) >> Optional.of(location)
         locationAccessRepository.findByLocationAndUser(location, friend) >> Optional.of(locationAccess)
 
         when:
@@ -93,7 +98,7 @@ class LocationAccessServiceSpec extends Specification {
 
         and:
         userService.findByEmail(email) >> friend
-        locationService.findById(locationId) >> location
+        locationRepository.findById(locationId) >> Optional.of(location)
         locationAccessRepository.findByLocationAndUser(location, friend) >> Optional.empty()
 
         when:
@@ -138,7 +143,7 @@ class LocationAccessServiceSpec extends Specification {
         validator.validate(_ as LocationAccess) >> []
         userService.findById(userId) >> user
         userService.findByEmail(friendEmail) >> friend
-        locationService.findByAddress(locationAddress) >> location
+        locationRepository.findByAddress(locationAddress) >> Optional.of(location)
         locationAccessRepository.findByLocationAndUser(location, user) >> Optional.of(adminAccess)
 
         when:
@@ -160,7 +165,7 @@ class LocationAccessServiceSpec extends Specification {
         and:
         userService.findById(1) >> user
         userService.findByEmail(friendEmail) >> friend
-        locationService.findByAddress(locationAddress) >> location
+        locationRepository.findByAddress(locationAddress) >> Optional.of(location)
         locationAccessRepository.findByLocationAndUser(location, user) >> Optional.of(readAccess)
 
         when:

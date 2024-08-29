@@ -82,4 +82,15 @@ public class Location {
     public void setSharedUsers(List<User> sharedUsers) {
         this.sharedUsers = sharedUsers;
     }
+
+    @Override
+    public String toString() {
+        return "Location{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", address='" + address + '\'' +
+                ", owner=" + owner +
+                ", sharedUsers=" + sharedUsers +
+                '}';
+    }
 }
