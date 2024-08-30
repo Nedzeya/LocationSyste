@@ -8,8 +8,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
+/**
+ * REST controller for managing users in the location system.
+ * <p>
+ * Provides endpoints for user registration, fetching available locations, and managing user access to locations.
+ * </p>
+ */
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -26,6 +33,13 @@ public class UserController {
         this.locationAccessService = locationAccessService;
     }
 
+    /**
+     * Registers a new user.
+     *
+     * @param userDTO the user data transfer object containing user details
+     * @return a ResponseEntity with the registered user data or an error message
+     */
+
     @PostMapping()
     public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
         try {
@@ -38,7 +52,17 @@ public class UserController {
         }
     }
 
-    @GetMapping("/{id}/availableLocations") //own+shared with user
+    /**
+     * Retrieves available locations for a user (own+shared with user).
+     * <p>
+     * This includes locations owned by the user and locations shared with the user.
+     * </p>
+     *
+     * @param id the user ID
+     * @return a ResponseEntity with a list of available locations or an error message
+     */
+
+    @GetMapping("/{id}/availableLocations")
     public ResponseEntity<?> getAvailableLocations(@PathVariable int id) {
         try {
             List<List<LocationDTO>> availableLocations = locationService.getAvailableLocations(id);
@@ -50,6 +74,15 @@ public class UserController {
         }
     }
 
+    /**
+     * Adds a friend to a location with a specified access level.
+     *
+     * @param userId          the ID of the user adding the friend
+     * @param friendEmail     the email of the friend to be added
+     * @param locationAddress the address of the location to which the friend is being added
+     * @param accessLevel     the access level to be granted to the friend
+     * @return a ResponseEntity with a success message or an error message
+     */
     @PatchMapping("/{id}/addFriendToLocation")
     public ResponseEntity<String> addFriendToLocation(@PathVariable("id") int userId,
                                                       @RequestParam("friendEmail") String friendEmail,

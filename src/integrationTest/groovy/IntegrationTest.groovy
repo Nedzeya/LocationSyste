@@ -4,12 +4,11 @@ import org.apache.http.HttpResponse
 import org.apache.http.client.methods.HttpPatch
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
-
+/**
+ * Before running the integration tests, you need to START the application SERVER
+ * (this can be done manually. For example, using a Gradle task: ./gradlew bootRun)
+ **/
 @Stepwise
-
-// Before running the tests, you need to START the application SERVER
-// (this can be done manually. For example, using a Gradle task: ./gradlew bootRun)
-
 class IntegrationTest extends Specification {
 
     static final String BASE_URL = "http://localhost:8081"

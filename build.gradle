@@ -47,7 +47,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.6.4'
     implementation 'org.springframework.boot:spring-boot-starter-web:2.6.4'
-
     implementation 'javax.validation:validation-api:2.0.1.Final'
     implementation 'org.hibernate.validator:hibernate-validator:6.1.7.Final'
     implementation 'org.mapstruct:mapstruct:1.4.2.Final'
@@ -56,9 +55,11 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
 
-    //testImplementation 'org.spockframework:spock-core:1.3-groovy-2.4'
-    //testImplementation 'org.spockframework:spock-spring:1.3-groovy-2.4'
-    //testImplementation 'org.codehaus.groovy:groovy-all:2.4.15'
+    // Dependencies for unit tests
+
+    //  testImplementation 'org.spockframework:spock-core:1.3-groovy-2.4'
+    // testImplementation 'org.spockframework:spock-spring:1.3-groovy-2.4'
+    //  testImplementation 'org.codehaus.groovy:groovy-all:2.4.15'
     testImplementation 'org.spockframework:spock-core:2.0-groovy-3.0'
     testImplementation 'org.spockframework:spock-spring:2.0-groovy-3.0'
     testImplementation 'org.codehaus.groovy:groovy-all:3.0.9'
@@ -66,15 +67,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'com.h2database:h2'
 
-   // integrationTestImplementation 'org.spockframework:spock-core:1.3-groovy-2.4'
-   // integrationTestImplementation 'org.spockframework:spock-spring:1.3-groovy-2.4'
-   // integrationTestImplementation 'org.codehaus.groovy:groovy-all:2.4.15'
-    integrationTestImplementation 'org.spockframework:spock-core:2.0-groovy-3.0'
-    integrationTestImplementation 'org.spockframework:spock-spring:2.0-groovy-3.0'
-    integrationTestImplementation 'org.codehaus.groovy:groovy-all:3.0.9'
-
-    integrationTestImplementation 'com.h2database:h2'
-    integrationTestImplementation 'org.springframework.boot:spring-boot-starter-test'
+    // Dependencies for integration tests
     integrationTestImplementation 'org.apache.httpcomponents:httpclient:4.5.13'
 }
 
@@ -103,6 +96,7 @@ test {
     include '**/*Spec.*'
     finalizedBy jacocoTestReport
 }
+
 jacocoTestReport {
     reports {
         xml.enabled true
