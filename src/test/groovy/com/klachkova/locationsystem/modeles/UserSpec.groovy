@@ -2,7 +2,6 @@ package com.klachkova.locationsystem.modeles
 
 import spock.lang.Specification
 import spock.lang.Unroll
-
 import javax.validation.Validation
 import javax.validation.Validator
 
