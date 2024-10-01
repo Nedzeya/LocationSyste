@@ -9,12 +9,14 @@ import com.klachkova.locationsystem.util.exceptions.NotCreatedException;
 import com.klachkova.locationsystem.util.exceptions.NotFoundException;
 import com.klachkova.locationsystem.util.exceptions.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -27,12 +29,17 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class LocationService {
 
+    private static final long CACHE_EXPIRATION = 10;
+
     private final UserRepository userRepository;
     private final UserConverter userConverter;
     private final LocationRepository locationRepository;
     private final LocationConverter locationConverter;
     private final LocationAccessService locationAccessService;
     private final Validator validator;
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
     public LocationService(UserRepository userRepository,
@@ -111,18 +118,25 @@ public class LocationService {
     }
 
     /**
-     * Retrieves a location by its ID.
-     * <p>
-     * Throws an exception if no location with the given ID is found.
-     * </p>
+     * Retrieves a Location by its ID.
+     * First checks the Redis cache for the location.
+     * If the location is not found in the cache, it retrieves
+     * the location from the database and caches it for future access.
      *
      * @param id the ID of the location to retrieve
      * @return the Location entity with the given ID
      * @throws NotFoundException if no location with the given ID is found
      */
     public Location findById(int id) {
-        return locationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Location with ID " + id + " not found"));
+
+        String redisKey = "Location:" + id;
+        Location location = (Location) redisTemplate.opsForValue().get(redisKey);
+        if (location == null) {
+            location = locationRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Location with ID " + id + " not found"));
+            redisTemplate.opsForValue().set(redisKey, location, CACHE_EXPIRATION, TimeUnit.MINUTES);
+        }
+        return location;
     }
 
     /**
