@@ -37,9 +37,7 @@ public class LocationService {
     private final LocationConverter locationConverter;
     private final LocationAccessService locationAccessService;
     private final Validator validator;
-
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
     public LocationService(UserRepository userRepository,
@@ -47,13 +45,14 @@ public class LocationService {
                            com.klachkova.locationsystem.repositories.LocationRepository locationRepository,
                            LocationConverter locationConverter,
                            LocationAccessService locationAccessService,
-                           Validator validator) {
+                           Validator validator, RedisTemplate<String, Object> redisTemplate) {
         this.userRepository = userRepository;
         this.userConverter = userConverter;
         this.locationRepository = locationRepository;
         this.locationConverter = locationConverter;
         this.locationAccessService = locationAccessService;
         this.validator = validator;
+        this.redisTemplate = redisTemplate;
     }
 
     /**
