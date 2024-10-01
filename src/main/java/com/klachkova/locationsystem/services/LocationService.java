@@ -78,8 +78,6 @@ public class LocationService {
             throw new NotCreatedException("Location with that address already exists");
         }
         Location registeredLocation = locationRepository.save(locationToRegister);
-        String redisKey = "Location:" + registeredLocation.getId();
-        redisTemplate.opsForValue().set(redisKey, registeredLocation, CACHE_EXPIRATION, TimeUnit.MINUTES);
         return locationConverter.convertToDto(registeredLocation);
     }
 
