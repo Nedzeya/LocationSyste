@@ -127,15 +127,8 @@ public class LocationService {
      * @throws NotFoundException if no location with the given ID is found
      */
     public Location findById(int id) {
-
-        String redisKey = "Location:" + id;
-        Location location = (Location) redisTemplate.opsForValue().get(redisKey);
-        if (location == null) {
-            location = locationRepository.findById(id)
+           return locationRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Location with ID " + id + " not found"));
-            redisTemplate.opsForValue().set(redisKey, location, CACHE_EXPIRATION, TimeUnit.MINUTES);
-        }
-        return location;
     }
 
     /**
