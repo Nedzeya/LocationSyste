@@ -62,6 +62,7 @@ public class LocationService {
      * Associates the location with the user specified in the DTO.
      * Caches the registered location for future retrieval.
      * </p>
+     *
      * @param locationDTO the data transfer object representing the location to register
      * @return the registered location as a LocationDTO
      * @throws NotCreatedException if the location already exists or the user does not exist
@@ -127,8 +128,8 @@ public class LocationService {
      * @throws NotFoundException if no location with the given ID is found
      */
     public Location findById(int id) {
-           return locationRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Location with ID " + id + " not found"));
+        return locationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Location with ID " + id + " not found"));
     }
 
     /**
@@ -154,6 +155,8 @@ public class LocationService {
     public List<List<LocationDTO>> getAvailableLocations(int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found with ID: " + userId));
+        String redisKey = "AvailableLocationsDTO" + userId;
+
         List<Location> allOwnLocations = locationRepository.findAllByOwner(user);
         List<Location> allSharedLocations = locationAccessService.getAllSharedLocations(user);
         List<List<Location>> availableLocations = Arrays.asList(allOwnLocations, allSharedLocations);
