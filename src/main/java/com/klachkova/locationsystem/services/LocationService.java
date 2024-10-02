@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class LocationService {
 
-    private static final long CACHE_EXPIRATION = 10;
+ //   private static final long CACHE_EXPIRATION = 10;
 
     private final UserRepository userRepository;
     private final UserConverter userConverter;
@@ -37,7 +37,7 @@ public class LocationService {
     private final LocationConverter locationConverter;
     private final LocationAccessService locationAccessService;
     private final Validator validator;
-    private final RedisTemplate<String, Object> redisTemplate;
+  //  private final RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
     public LocationService(UserRepository userRepository,
@@ -45,14 +45,14 @@ public class LocationService {
                            com.klachkova.locationsystem.repositories.LocationRepository locationRepository,
                            LocationConverter locationConverter,
                            LocationAccessService locationAccessService,
-                           Validator validator, RedisTemplate<String, Object> redisTemplate) {
+                           Validator validator) {
         this.userRepository = userRepository;
         this.userConverter = userConverter;
         this.locationRepository = locationRepository;
         this.locationConverter = locationConverter;
         this.locationAccessService = locationAccessService;
         this.validator = validator;
-        this.redisTemplate = redisTemplate;
+     //   this.redisTemplate = redisTemplate;
     }
 
     /**
