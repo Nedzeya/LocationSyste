@@ -121,9 +121,6 @@ public class LocationService {
 
     /**
      * Retrieves a Location by its ID.
-     * First checks the Redis cache for the location.
-     * If the location is not found in the cache, it retrieves
-     * the location from the database and caches it for future access.
      *
      * @param id the ID of the location to retrieve
      * @return the Location entity with the given ID
