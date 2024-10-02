@@ -9,14 +9,13 @@ import com.klachkova.locationsystem.util.exceptions.NotCreatedException;
 import com.klachkova.locationsystem.util.exceptions.NotFoundException;
 import com.klachkova.locationsystem.util.exceptions.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -148,7 +147,7 @@ public class LocationService {
      * @return a list of lists containing DTOs for the user's owned and shared locations
      * @throws NotFoundException if no user with the given ID is found
      */
-
+    @Cacheable(value = "availableLocations", key = "#userId")
     public List<List<LocationDTO>> getAvailableLocations(int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found with ID: " + userId));
