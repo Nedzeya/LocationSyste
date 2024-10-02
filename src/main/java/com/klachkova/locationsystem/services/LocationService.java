@@ -59,7 +59,6 @@ public class LocationService {
      * <p>
      * Converts the provided LocationDTO to a Location entity, validates it, and saves it to the repository.
      * Associates the location with the user specified in the DTO.
-     * Caches the registered location for future retrieval.
      * </p>
      *
      * @param locationDTO the data transfer object representing the location to register
