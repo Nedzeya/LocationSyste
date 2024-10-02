@@ -105,4 +105,15 @@ class IntegrationTest extends Specification {
         then: "Should return the list of locations"
         connection.responseCode == HttpURLConnection.HTTP_OK
     }
+
+    def "Get all locations available for user repeatedly"() {
+        when: "Get all locations available for a user"
+        def locationsUrl = new URL("${BASE_URL}/api/users/1/availableLocations")
+        def connection = (HttpURLConnection) locationsUrl.openConnection()
+        connection.requestMethod = 'GET'
+        connection.connect()
+
+        then: "Should return the list of locations"
+        connection.responseCode == HttpURLConnection.HTTP_OK
+    }
 }
