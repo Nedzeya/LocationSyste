@@ -106,7 +106,7 @@ class IntegrationTest extends Specification {
         connection.responseCode == HttpURLConnection.HTTP_OK
     }
 
-    def "Get all locations available for user repeatedly"() {
+    def "Get all locations available for user"() {
         when: "Get all locations available for a user"
         def locationsUrl = new URL("${BASE_URL}/api/users/1/availableLocations")
         def connection = (HttpURLConnection) locationsUrl.openConnection()
@@ -115,5 +115,38 @@ class IntegrationTest extends Specification {
 
         then: "Should return the list of locations"
         connection.responseCode == HttpURLConnection.HTTP_OK
+    }
+
+    def "Get all locations available for user and test caching"() {
+        when: "Get all locations available for a user the first time"
+        long startTime1 = System.currentTimeMillis()
+        def locationsUrl = new URL("${BASE_URL}/api/users/2/availableLocations")
+        def connection1 = (HttpURLConnection) locationsUrl.openConnection()
+        connection1.requestMethod = 'GET'
+        connection1.connect()
+
+        long endTime1 = System.currentTimeMillis()
+        long duration1 = endTime1 - startTime1
+
+        then: "Should return the list of locations with a cache miss"
+        connection1.responseCode == HttpURLConnection.HTTP_OK
+
+        when: "Get all locations available for a user the second time"
+        long startTime2 = System.currentTimeMillis()
+        def connection2 = (HttpURLConnection) locationsUrl.openConnection()
+        connection2.requestMethod = 'GET'
+        connection2.connect()
+
+        long endTime2 = System.currentTimeMillis()
+        long duration2 = endTime2 - startTime2
+
+        then: "Should return the list of locations from cache"
+        connection2.responseCode == HttpURLConnection.HTTP_OK
+
+        and: "The second response should be faster due to cache hit"
+        assert duration2 < duration1, "Second request (cache hit) should be faster than the first request (cache miss)"
+
+        println "First request duration (cache miss): ${duration1} ms"
+        println "Second request duration (cache hit): ${duration2} ms"
     }
 }
