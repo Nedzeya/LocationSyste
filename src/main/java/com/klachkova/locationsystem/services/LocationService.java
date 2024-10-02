@@ -29,15 +29,12 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class LocationService {
 
- //   private static final long CACHE_EXPIRATION = 10;
-
     private final UserRepository userRepository;
     private final UserConverter userConverter;
     private final LocationRepository locationRepository;
     private final LocationConverter locationConverter;
     private final LocationAccessService locationAccessService;
     private final Validator validator;
-  //  private final RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
     public LocationService(UserRepository userRepository,
@@ -52,7 +49,6 @@ public class LocationService {
         this.locationConverter = locationConverter;
         this.locationAccessService = locationAccessService;
         this.validator = validator;
-     //   this.redisTemplate = redisTemplate;
     }
 
     /**
@@ -152,10 +148,10 @@ public class LocationService {
      * @return a list of lists containing DTOs for the user's owned and shared locations
      * @throws NotFoundException if no user with the given ID is found
      */
+
     public List<List<LocationDTO>> getAvailableLocations(int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found with ID: " + userId));
-        String redisKey = "AvailableLocationsDTO" + userId;
 
         List<Location> allOwnLocations = locationRepository.findAllByOwner(user);
         List<Location> allSharedLocations = locationAccessService.getAllSharedLocations(user);
