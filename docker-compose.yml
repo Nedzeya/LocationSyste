@@ -1,0 +1,11 @@
+services:
+  redis-cache:
+    image: redis:latest
+    container_name: my-redis-cache
+    ports:
+      - "6380:6379" #  Redis for LocationSystem port 6380
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+volumes:
+  redis-data:

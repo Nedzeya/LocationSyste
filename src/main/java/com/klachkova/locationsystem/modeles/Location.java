@@ -1,11 +1,13 @@
 package com.klachkova.locationsystem.modeles;
 
 import com.klachkova.locationsystem.util.annotations.USAddress;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.List;
+
 /**
  * Represents a location in the system.
  *
@@ -15,6 +17,7 @@ import java.util.List;
 @Entity
 @Table(name = "Location")
 public class Location {
+
     /**
      * Unique identifier for the location.
      */
@@ -50,20 +53,24 @@ public class Location {
      */
     @OneToMany
     private List<User> sharedUsers;
+
     /**
      * Default constructor.
      */
     public Location() {
+
     }
+
     /**
      * Constructs a new Location with the specified id, name, address, and owner.
      *
-     * @param id       the unique identifier of the location
-     * @param name     the name of the location
-     * @param address  the address of the location
-     * @param owner    the user who owns the location
+     * @param id      the unique identifier of the location
+     * @param name    the name of the location
+     * @param address the address of the location
+     * @param owner   the user who owns the location
      */
     public Location(Integer id, String name, String address, User owner) {
+
         this.id = id;
         this.name = name;
         this.address = address;
@@ -71,53 +78,64 @@ public class Location {
     }
 
     public Integer getId() {
+
         return id;
     }
 
     public void setId(Integer id) {
+
         this.id = id;
     }
 
     public String getName() {
+
         return name;
     }
 
     public void setName(String name) {
+
         this.name = name;
     }
 
     public String getAddress() {
+
         return address;
     }
 
     public void setAddress(String address) {
+
         this.address = address;
     }
 
     public User getOwner() {
+
         return owner;
     }
 
     public void setOwner(User owner) {
+
         this.owner = owner;
     }
 
     public List<User> getSharedUsers() {
+
         return sharedUsers;
     }
 
     public void setSharedUsers(List<User> sharedUsers) {
+
         this.sharedUsers = sharedUsers;
     }
 
     @Override
     public String toString() {
+
         return "Location{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", address='" + address + '\'' +
-                ", owner=" + owner +
-                ", sharedUsers=" + sharedUsers +
-                '}';
+            "id=" + id +
+            ", name='" + name + '\'' +
+            ", address='" + address + '\'' +
+            ", owner=" + owner +
+            ", sharedUsers=" + sharedUsers +
+            '}';
     }
 }

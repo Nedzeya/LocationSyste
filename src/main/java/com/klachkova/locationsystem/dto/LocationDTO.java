@@ -1,4 +1,5 @@
 package com.klachkova.locationsystem.dto;
+
 /**
  * Data Transfer Object (DTO) for {@link Location}.
  * <p>
@@ -8,6 +9,7 @@ package com.klachkova.locationsystem.dto;
  * </p>
  */
 public class LocationDTO {
+
     /**
      * The name of the location.
      * <p>
@@ -32,26 +34,32 @@ public class LocationDTO {
     private UserDTO owner;
 
     public String getName() {
+
         return name;
     }
 
     public void setName(String name) {
+
         this.name = name;
     }
 
     public String getAddress() {
+
         return address;
     }
 
     public void setAddress(String address) {
+
         this.address = address;
     }
 
     public UserDTO getOwner() {
+
         return owner;
     }
 
     public void setOwner(UserDTO owner) {
+
         this.owner = owner;
     }
 }

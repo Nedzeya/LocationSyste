@@ -6,8 +6,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-@Mapper (uses = UserMapper.class)
+@Mapper(uses = UserMapper.class)
 public interface LocationMapper {
+
     LocationMapper INSTANCE = Mappers.getMapper(LocationMapper.class);
 
     @Mapping(target = "sharedUsers", ignore = true)

@@ -1,8 +1,10 @@
 package com.klachkova.locationsystem.modeles;
 
 import com.klachkova.locationsystem.util.annotations.ValidAccessLevel;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+
 /**
  * Represents the access permissions of a user to a specific location in the system.
  *
@@ -12,6 +14,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "LocationAccess")
 public class LocationAccess {
+
     /**
      * Unique identifier for the location access entry.
      */
@@ -33,7 +36,7 @@ public class LocationAccess {
      * <p>Must not be null.</p>
      */
     @ManyToOne
-    @NotNull (message = "Location should not be empty")
+    @NotNull(message = "Location should not be empty")
     @JoinColumn(name = "location_id", referencedColumnName = "id")
     private Location location;
     /**
@@ -49,7 +52,9 @@ public class LocationAccess {
      * Default constructor.
      */
     public LocationAccess() {
+
     }
+
     /**
      * Constructs a new LocationAccess with the specified user, location, and access level.
      *
@@ -57,41 +62,50 @@ public class LocationAccess {
      * @param location    the location to which access is granted
      * @param accessLevel the level of access granted
      */
-    public LocationAccess( User user, Location location, AccessLevel accessLevel) {
+    public LocationAccess(User user, Location location, AccessLevel accessLevel) {
+
         this.user = user;
         this.location = location;
         this.accessLevel = accessLevel;
     }
 
     public Integer getId() {
+
         return id;
     }
 
     public void setId(Integer id) {
+
         this.id = id;
     }
 
     public User getUser() {
+
         return user;
     }
 
     public void setUser(User user) {
+
         this.user = user;
     }
 
     public Location getLocation() {
+
         return location;
     }
 
     public void setLocation(Location location) {
+
         this.location = location;
     }
 
     public AccessLevel getAccessLevel() {
+
         return accessLevel;
     }
 
     public void setAccessLevel(AccessLevel accessLevel) {
+
         this.accessLevel = accessLevel;
     }
 }

@@ -10,26 +10,27 @@ class AccessLevelValidatorSpec extends Specification {
     def validator = new AccessLevelValidator()
 
     def setup() {
+
         validator.initialize(Mock(ValidAccessLevel))
     }
 
-
     def "test valid AccessLevel READ_ONLY"() {
+
         given:
-        def context = Mock(ConstraintValidatorContext)
-        def validAccessLevel = AccessLevel.READ_ONLY
+            def context = Mock(ConstraintValidatorContext)
+            def validAccessLevel = AccessLevel.READ_ONLY
 
         expect:
-        validator.isValid(validAccessLevel, context)
+            validator.isValid(validAccessLevel, context)
     }
 
     def "test valid AccessLevel ADMIN"() {
+
         given:
-        def context = Mock(ConstraintValidatorContext)
-        def validAccessLevel = AccessLevel.ADMIN
+            def context = Mock(ConstraintValidatorContext)
+            def validAccessLevel = AccessLevel.ADMIN
 
         expect:
-        validator.isValid(validAccessLevel, context)
+            validator.isValid(validAccessLevel, context)
     }
-
 }

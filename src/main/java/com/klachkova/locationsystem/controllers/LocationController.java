@@ -26,8 +26,11 @@ public class LocationController {
     private final LocationAccessService locationAccessService;
 
     @Autowired
-    public LocationController(LocationService locationService,
-                              LocationAccessService locationAccessService) {
+    public LocationController(
+        LocationService locationService,
+        LocationAccessService locationAccessService
+    ) {
+
         this.locationService = locationService;
         this.locationAccessService = locationAccessService;
     }
@@ -40,6 +43,7 @@ public class LocationController {
      */
     @PostMapping()
     public ResponseEntity<?> registerLocation(@RequestBody LocationDTO locationDTO) {
+
         try {
             LocationDTO registeredLocationDTO = locationService.registerLocation(locationDTO);
             return new ResponseEntity<>(registeredLocationDTO, HttpStatus.CREATED);
@@ -59,9 +63,12 @@ public class LocationController {
      * @return a ResponseEntity with a success message or an error message
      */
     @PostMapping("/{id}/share")
-    public ResponseEntity<?> shareLocation(@PathVariable("id") int id,
-                                           @RequestParam("userEmail") String userEmail,
-                                           @RequestParam("accessLevel") AccessLevel accessLevel) {
+    public ResponseEntity<?> shareLocation(
+        @PathVariable("id") int id,
+        @RequestParam("userEmail") String userEmail,
+        @RequestParam("accessLevel") AccessLevel accessLevel
+    ) {
+
         try {
             System.out.println("locationController sharing " + id + userEmail + accessLevel);
             locationAccessService.shareLocation(id, userEmail, accessLevel);
@@ -83,10 +90,12 @@ public class LocationController {
      * @return a ResponseEntity with a success message or an error message
      */
     @PatchMapping("/{id}/access")
-    public ResponseEntity<String> updateAccessLevel(@PathVariable("id") int locationId,
-                                                    @RequestParam("userEmail") String userEmail,
-                                                    @RequestParam("accessLevel") AccessLevel accessLevel
+    public ResponseEntity<String> updateAccessLevel(
+        @PathVariable("id") int locationId,
+        @RequestParam("userEmail") String userEmail,
+        @RequestParam("accessLevel") AccessLevel accessLevel
     ) {
+
         try {
             locationAccessService.updateLocationAccessByAccessLevel(locationId, userEmail, accessLevel);
             return new ResponseEntity<>("Access level updated successfully.", HttpStatus.OK);
@@ -105,6 +114,7 @@ public class LocationController {
      */
     @GetMapping("{id}/friends") //all friend users on the location
     public ResponseEntity<?> getAllFriendUsers(@PathVariable("id") int id) {
+
         try {
             List<UserDTO> friends = locationService.getFriendsToLocation(id);
             if (friends.isEmpty()) {

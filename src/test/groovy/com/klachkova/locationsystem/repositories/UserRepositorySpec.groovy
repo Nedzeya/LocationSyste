@@ -12,52 +12,56 @@ class UserRepositorySpec extends Specification {
     UserRepository userRepository
 
     def "test existsByEmail returns true when user with email exists"() {
+
         given:
-        def email = "existingUser@example.com"
-        def user = new User(name: "name",email: email)
-        userRepository.save(user)
+            def email = "existingUser@example.com"
+            def user = new User(name: "name", email: email)
+            userRepository.save(user)
 
         when:
-        def result = userRepository.existsByEmail(email)
+            def result = userRepository.existsByEmail(email)
 
         then:
-        result == true
+            result == true
     }
 
     def "test existsByEmail returns false when user with email does not exist"() {
+
         given:
-        def email = "nonexistentUser@example.com"
+            def email = "nonexistentUser@example.com"
 
         when:
-        def result = userRepository.existsByEmail(email)
+            def result = userRepository.existsByEmail(email)
 
         then:
-        result == false
+            result == false
     }
 
     def "test findByEmail returns user when user with email exists"() {
+
         given:
-        def email = "existingUser@example.com"
-        def user = new User(name: "name", email: email)
-        userRepository.save(user)
+            def email = "existingUser@example.com"
+            def user = new User(name: "name", email: email)
+            userRepository.save(user)
 
         when:
-        def result = userRepository.findByEmail(email)
+            def result = userRepository.findByEmail(email)
 
         then:
-        result.isPresent()
-        result.get().email == email
-        result.get().name == "name"
+            result.isPresent()
+            result.get().email == email
+            result.get().name == "name"
     }
 
     def "test findByEmail returns empty when user with email does not exist"() {
+
         given:
-        def email = "nonexistentUser@example.com"
+            def email = "nonexistentUser@example.com"
 
         when:
-        def result = userRepository.findByEmail(email)
+            def result = userRepository.findByEmail(email)
 
         then:
-        !result.isPresent()
+            !result.isPresent()
     }
 }
