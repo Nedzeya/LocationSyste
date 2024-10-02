@@ -3,6 +3,7 @@ package com.klachkova.locationsystem.modeles;
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.util.List;
+
 /**
  * Represents a user in the system.
  *
@@ -13,6 +14,7 @@ import java.util.List;
 @Entity
 @Table(name = "User")
 public class User {
+
     /**
      * Unique identifier for the user.
      */
@@ -40,11 +42,14 @@ public class User {
      */
     @OneToMany
     private List<Location> locations;
+
     /**
      * Default constructor.
      */
     public User() {
+
     }
+
     /**
      * Constructs a new User with the specified name and email.
      *
@@ -52,49 +57,59 @@ public class User {
      * @param email the email of the user
      */
     public User(String name, String email) {
+
         this.name = name;
         this.email = email;
     }
 
     public Integer getId() {
+
         return id;
     }
 
     public void setId(Integer id) {
+
         this.id = id;
     }
 
     public String getName() {
+
         return name;
     }
 
     public void setName(String name) {
+
         this.name = name;
     }
 
     public String getEmail() {
+
         return email;
     }
 
     public void setEmail(String email) {
+
         this.email = email;
     }
 
     public List<Location> getLocations() {
+
         return locations;
     }
 
     public void setLocations(List<Location> locations) {
+
         this.locations = locations;
     }
 
     @Override
     public String toString() {
+
         return "User{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", locations=" + locations +
-                '}';
+            "id=" + id +
+            ", name='" + name + '\'' +
+            ", email='" + email + '\'' +
+            ", locations=" + locations +
+            '}';
     }
 }

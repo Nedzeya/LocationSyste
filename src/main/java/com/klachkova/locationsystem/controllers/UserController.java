@@ -20,14 +20,18 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
+
     private final UserService userService;
     private final LocationService locationService;
     private final LocationAccessService locationAccessService;
 
     @Autowired
-    public UserController(UserService userService,
-                          LocationService locationService,
-                          LocationAccessService locationAccessService) {
+    public UserController(
+        UserService userService,
+        LocationService locationService,
+        LocationAccessService locationAccessService
+    ) {
+
         this.userService = userService;
         this.locationService = locationService;
         this.locationAccessService = locationAccessService;
@@ -42,6 +46,7 @@ public class UserController {
 
     @PostMapping()
     public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
+
         try {
             UserDTO registeredUserDTO = userService.registerUser(userDTO);
             return new ResponseEntity<>(registeredUserDTO, HttpStatus.CREATED);
@@ -64,6 +69,7 @@ public class UserController {
 
     @GetMapping("/{id}/availableLocations")
     public ResponseEntity<?> getAvailableLocations(@PathVariable int id) {
+
         try {
             List<List<LocationDTO>> availableLocations = locationService.getAvailableLocations(id);
             return new ResponseEntity<>(availableLocations, HttpStatus.OK);
@@ -84,10 +90,13 @@ public class UserController {
      * @return a ResponseEntity with a success message or an error message
      */
     @PatchMapping("/{id}/addFriendToLocation")
-    public ResponseEntity<String> addFriendToLocation(@PathVariable("id") int userId,
-                                                      @RequestParam("friendEmail") String friendEmail,
-                                                      @RequestParam("locationAddress") String locationAddress,
-                                                      @RequestParam("accessLevel") AccessLevel accessLevel) {
+    public ResponseEntity<String> addFriendToLocation(
+        @PathVariable("id") int userId,
+        @RequestParam("friendEmail") String friendEmail,
+        @RequestParam("locationAddress") String locationAddress,
+        @RequestParam("accessLevel") AccessLevel accessLevel
+    ) {
+
         try {
             locationAccessService.addFriendToLocation(userId, friendEmail, locationAddress, accessLevel);
             return ResponseEntity.ok("Friend added successfully.");

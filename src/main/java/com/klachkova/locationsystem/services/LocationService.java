@@ -21,7 +21,8 @@ import java.util.stream.Collectors;
 /**
  * Service class for managing Location entities.
  * <p>
- * Provides methods to register a new location, validate location data, find locations by address or ID, and retrieve available locations for a user.
+ * Provides methods to register a new location, validate location data, find locations by address or ID, and retrieve
+ * available locations for a user.
  * </p>
  */
 @Service
@@ -36,12 +37,15 @@ public class LocationService {
     private final Validator validator;
 
     @Autowired
-    public LocationService(UserRepository userRepository,
-                           UserConverter userConverter,
-                           com.klachkova.locationsystem.repositories.LocationRepository locationRepository,
-                           LocationConverter locationConverter,
-                           LocationAccessService locationAccessService,
-                           Validator validator) {
+    public LocationService(
+        UserRepository userRepository,
+        UserConverter userConverter,
+        com.klachkova.locationsystem.repositories.LocationRepository locationRepository,
+        LocationConverter locationConverter,
+        LocationAccessService locationAccessService,
+        Validator validator
+    ) {
+
         this.userRepository = userRepository;
         this.userConverter = userConverter;
         this.locationRepository = locationRepository;
@@ -65,10 +69,11 @@ public class LocationService {
      */
     @Transactional
     public LocationDTO registerLocation(LocationDTO locationDTO) {
+
         Location locationToRegister = locationConverter.convertToEntity(locationDTO);
         validateLocation(locationToRegister);
         User existingUser = userRepository.findByEmail(locationDTO.getOwner().getEmail())
-                .orElseThrow(() -> new NotCreatedException("No such user in the database"));
+            .orElseThrow(() -> new NotCreatedException("No such user in the database"));
         locationToRegister.setOwner(existingUser);
         if (existsByAddress(locationToRegister.getAddress())) {
             throw new NotCreatedException("Location with that address already exists");
@@ -80,13 +85,15 @@ public class LocationService {
     /**
      * Validates the provided Location entity.
      * <p>
-     * Checks if the Location entity adheres to the validation constraints and throws an exception if any violations are found.
+     * Checks if the Location entity adheres to the validation constraints and throws an exception if any violations
+     * are found.
      * </p>
      *
      * @param location the Location entity to validate
      * @throws ValidationException if validation constraints are violated
      */
     private void validateLocation(Location location) {
+
         Set<ConstraintViolation<Location>> violations = validator.validate(location);
         if (!violations.isEmpty()) {
             StringBuilder sb = new StringBuilder();
@@ -108,8 +115,9 @@ public class LocationService {
      * @throws NotFoundException if no location with the given address is found
      */
     public Location findByAddress(String address) {
+
         return locationRepository.findByAddress(address)
-                .orElseThrow(() -> new NotFoundException("Location with address " + address + " not found"));
+            .orElseThrow(() -> new NotFoundException("Location with address " + address + " not found"));
     }
 
     /**
@@ -123,8 +131,9 @@ public class LocationService {
      * @throws NotFoundException if no location with the given ID is found
      */
     public Location findById(int id) {
+
         return locationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Location with ID " + id + " not found"));
+            .orElseThrow(() -> new NotFoundException("Location with ID " + id + " not found"));
     }
 
     /**
@@ -134,6 +143,7 @@ public class LocationService {
      * @return true if a location with the given address exists, otherwise false
      */
     public boolean existsByAddress(String address) {
+
         return locationRepository.existsByAddress(address);
     }
 
@@ -149,17 +159,18 @@ public class LocationService {
      */
     @Cacheable(value = "availableLocations", key = "#userId")
     public List<List<LocationDTO>> getAvailableLocations(int userId) {
+
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found with ID: " + userId));
+            .orElseThrow(() -> new NotFoundException("User not found with ID: " + userId));
 
         List<Location> allOwnLocations = locationRepository.findAllByOwner(user);
         List<Location> allSharedLocations = locationAccessService.getAllSharedLocations(user);
         List<List<Location>> availableLocations = Arrays.asList(allOwnLocations, allSharedLocations);
         return availableLocations.stream()
-                .map(locationList -> locationList.stream()
-                        .map(locationConverter::convertToDto)
-                        .collect(Collectors.toList()))
-                .collect(Collectors.toList());
+            .map(locationList -> locationList.stream()
+                .map(locationConverter::convertToDto)
+                .collect(Collectors.toList()))
+            .collect(Collectors.toList());
     }
 
     /**
@@ -169,9 +180,10 @@ public class LocationService {
      * @return a list of UserDTOs representing friends with access to the location
      */
     public List<UserDTO> getFriendsToLocation(int locationId) {
+
         return locationAccessService.getFriends(locationId)
-                .stream()
-                .map(userConverter::convertToDto)
-                .collect(Collectors.toList());
+            .stream()
+            .map(userConverter::convertToDto)
+            .collect(Collectors.toList());
     }
 }

@@ -33,10 +33,13 @@ public class LocationAccessService {
     private final Validator validator;
 
     @Autowired
-    public LocationAccessService(LocationAccessRepository locationAccessRepository,
-                                 UserService userService,
-                                 LocationRepository locationRepository,
-                                 Validator validator) {
+    public LocationAccessService(
+        LocationAccessRepository locationAccessRepository,
+        UserService userService,
+        LocationRepository locationRepository,
+        Validator validator
+    ) {
+
         this.locationAccessRepository = locationAccessRepository;
         this.userService = userService;
         this.locationRepository = locationRepository;
@@ -50,11 +53,12 @@ public class LocationAccessService {
      * @return a list of locations shared with the user
      */
     public List<Location> getAllSharedLocations(User user) {
+
         List<LocationAccess> locationAccesses = locationAccessRepository.findByUser(user);
         return locationAccesses.stream()
-                .map(LocationAccess::getLocation)
-                .distinct()
-                .collect(Collectors.toList());
+            .map(LocationAccess::getLocation)
+            .distinct()
+            .collect(Collectors.toList());
     }
 
     /**
@@ -71,9 +75,10 @@ public class LocationAccessService {
      */
     @Transactional
     public void shareLocation(int locationId, String userEmail, AccessLevel accessLevel) {
+
         User user = userService.findByEmail(userEmail);
         Location location = locationRepository.findById(locationId)
-                .orElseThrow(() -> new NotFoundException("Location with ID " + locationId + " not found"));
+            .orElseThrow(() -> new NotFoundException("Location with ID " + locationId + " not found"));
         LocationAccess locationAccessToSave = new LocationAccess(user, location, accessLevel);
         validateLocationAccess(locationAccessToSave);
         locationAccessRepository.save(locationAccessToSave);
@@ -93,12 +98,14 @@ public class LocationAccessService {
      */
     @Transactional
     public void updateLocationAccessByAccessLevel(int locationId, String userEmail, AccessLevel accessLevel) {
+
         User user = userService.findByEmail(userEmail);
         Location location = locationRepository.findById(locationId)
-                .orElseThrow(() -> new NotFoundException("Location with ID " + locationId + " not found"));
+            .orElseThrow(() -> new NotFoundException("Location with ID " + locationId + " not found"));
         ;
         LocationAccess locationAccess = locationAccessRepository.findByLocationAndUser(location, user)
-                .orElseThrow(() -> new NotFoundException("LocationAccess with locationID " + locationId + " and userEmail " + userEmail + " not found"));
+            .orElseThrow(() -> new NotFoundException("LocationAccess with locationID " + locationId + " and userEmail" +
+                " " + userEmail + " not found"));
 
         locationAccess.setAccessLevel(accessLevel);
 
@@ -114,10 +121,11 @@ public class LocationAccessService {
      * @return a list of users with access to the location
      */
     public List<User> getFriends(int locationId) {
+
         List<LocationAccess> accesses = locationAccessRepository.findByLocationId(locationId);
         return accesses.stream()
-                .map(LocationAccess::getUser)
-                .collect(Collectors.toList());
+            .map(LocationAccess::getUser)
+            .collect(Collectors.toList());
     }
 
     /**
@@ -130,22 +138,25 @@ public class LocationAccessService {
      * @param friendEmail     the email of the friend to be added
      * @param locationAddress the address of the location
      * @param accessLevel     the access level to grant to the friend
-     * @throws NotFoundException         if the location or friend is not found, or if the user does not have access to the location
+     * @throws NotFoundException         if the location or friend is not found, or if the user does not have access
+     * to the location
      * @throws PermissionDeniedException if the user does not have ADMIN access to the location
      * @throws ValidationException       if the LocationAccess data is invalid
      */
     @Transactional
     public void addFriendToLocation(int userId, String friendEmail, String locationAddress, AccessLevel accessLevel) {
+
         User friendUser = userService.findByEmail(friendEmail);
         Location location = locationRepository.findByAddress(locationAddress)
-                .orElseThrow(() -> new NotFoundException("Location with address " + locationAddress + " not found"));
+            .orElseThrow(() -> new NotFoundException("Location with address " + locationAddress + " not found"));
 
-        LocationAccess adminAccess = locationAccessRepository.findByLocationAndUser(location, userService.findById(userId))
-                .orElseThrow(() -> new NotFoundException(
-                        "User with ID " + userId + " does not have access to this location"));
+        LocationAccess adminAccess = locationAccessRepository.findByLocationAndUser(location,
+                userService.findById(userId))
+            .orElseThrow(() -> new NotFoundException(
+                "User with ID " + userId + " does not have access to this location"));
         if (adminAccess.getAccessLevel() != AccessLevel.ADMIN) {
             throw new PermissionDeniedException(
-                    "User with ID " + userId + " does not have ADMIN access to location with address " + locationAddress);
+                "User with ID " + userId + " does not have ADMIN access to location with address " + locationAddress);
         }
 
         LocationAccess locationAccess = new LocationAccess(friendUser, location, accessLevel);
@@ -158,13 +169,15 @@ public class LocationAccessService {
     /**
      * Validates the LocationAccess entity.
      * <p>
-     * Checks if the LocationAccess entity adheres to validation constraints and throws an exception if any violations are found.
+     * Checks if the LocationAccess entity adheres to validation constraints and throws an exception if any
+     * violations are found.
      * </p>
      *
      * @param locationAccess the LocationAccess entity to validate
      * @throws ValidationException if validation constraints are violated
      */
     public void validateLocationAccess(LocationAccess locationAccess) {
+
         Set<ConstraintViolation<LocationAccess>> violations = validator.validate(locationAccess);
         if (!violations.isEmpty()) {
             StringBuilder sb = new StringBuilder();

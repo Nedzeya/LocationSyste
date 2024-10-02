@@ -18,6 +18,7 @@ import java.util.Optional;
  */
 @Repository
 public interface LocationRepository extends JpaRepository<Location, Integer> {
+
     /**
      * Checks if a location with the given address exists in the database.
      *

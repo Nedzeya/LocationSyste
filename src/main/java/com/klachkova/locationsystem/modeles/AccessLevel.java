@@ -1,4 +1,5 @@
 package com.klachkova.locationsystem.modeles;
+
 /**
  * Represents the access levels that can be assigned to users for a location.
  * <p>

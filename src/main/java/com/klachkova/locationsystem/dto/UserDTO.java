@@ -1,4 +1,5 @@
 package com.klachkova.locationsystem.dto;
+
 /**
  * Data Transfer Object (DTO) for {@link User}.
  * <p>
@@ -9,6 +10,7 @@ package com.klachkova.locationsystem.dto;
  * </p>
  */
 public class UserDTO {
+
     /**
      * The name of the user.
      * <p>
@@ -25,18 +27,22 @@ public class UserDTO {
     private String email;
 
     public String getName() {
+
         return name;
     }
 
     public void setName(String name) {
+
         this.name = name;
     }
 
     public String getEmail() {
+
         return email;
     }
 
     public void setEmail(String email) {
+
         this.email = email;
     }
 }

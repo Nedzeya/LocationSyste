@@ -13,10 +13,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class UserConverter {
+
     private final UserMapper userMapper;
 
     @Autowired
     public UserConverter() {
+
         this.userMapper = UserMapper.INSTANCE;
     }
 
@@ -27,6 +29,7 @@ public class UserConverter {
      * @return the converted User entity
      */
     public User convertToEntity(UserDTO userDTO) {
+
         return userMapper.convertToEntity(userDTO);
     }
 
@@ -37,6 +40,7 @@ public class UserConverter {
      * @return the converted UserDTO object
      */
     public UserDTO convertToDto(User user) {
+
         return userMapper.convertToDto(user);
     }
 }

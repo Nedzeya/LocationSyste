@@ -25,13 +25,14 @@ import java.util.Set;
 @Service
 @Transactional(readOnly = true)
 public class UserService {
+
     private final UserRepository userRepository;
     private final Validator validator;
     private final UserConverter userConverter;
 
-
     @Autowired
     public UserService(UserRepository userRepository, Validator validator, UserConverter userConverter) {
+
         this.userRepository = userRepository;
         this.validator = validator;
         this.userConverter = userConverter;
@@ -50,6 +51,7 @@ public class UserService {
      */
     @Transactional
     public UserDTO registerUser(UserDTO userDTO) {
+
         User userToRegister = userConverter.convertToEntity(userDTO);
         validateUser(userToRegister);
         String email = userToRegister.getEmail();
@@ -63,13 +65,15 @@ public class UserService {
     /**
      * Validates the provided User entity.
      * <p>
-     * Checks if the User entity adheres to the validation constraints and throws an exception if any violations are found.
+     * Checks if the User entity adheres to the validation constraints and throws an exception if any violations are
+     * found.
      * </p>
      *
      * @param user the User entity to validate
      * @throws ValidationException if validation constraints are violated
      */
     private void validateUser(User user) {
+
         Set<ConstraintViolation<User>> violations = validator.validate(user);
         if (!violations.isEmpty()) {
             StringBuilder sb = new StringBuilder();
@@ -86,6 +90,7 @@ public class UserService {
      * @return a list of all User entities
      */
     public List<User> findAll() {
+
         return userRepository.findAll();
     }
 
@@ -100,8 +105,9 @@ public class UserService {
      * @throws NotFoundException if no user with the given ID is found
      */
     public User findById(int id) {
+
         return userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User with ID " + id + " not found"));
+            .orElseThrow(() -> new NotFoundException("User with ID " + id + " not found"));
     }
 
     /**
@@ -115,7 +121,8 @@ public class UserService {
      * @throws NotFoundException if no user with the given email is found
      */
     public User findByEmail(String email) {
+
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("User with email " + email + " not found"));
+            .orElseThrow(() -> new NotFoundException("User with email " + email + " not found"));
     }
 }

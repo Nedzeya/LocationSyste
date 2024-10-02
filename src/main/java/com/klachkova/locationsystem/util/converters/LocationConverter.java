@@ -13,10 +13,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class LocationConverter {
+
     private final LocationMapper locationMapper;
 
     @Autowired
     public LocationConverter() {
+
         this.locationMapper = LocationMapper.INSTANCE;
     }
 
@@ -27,6 +29,7 @@ public class LocationConverter {
      * @return the converted Location entity
      */
     public Location convertToEntity(LocationDTO locationDTO) {
+
         return locationMapper.convertToEntity(locationDTO);
     }
 
@@ -37,6 +40,7 @@ public class LocationConverter {
      * @return the converted LocationDTO object
      */
     public LocationDTO convertToDto(Location location) {
+
         return locationMapper.convertToDto(location);
     }
 }

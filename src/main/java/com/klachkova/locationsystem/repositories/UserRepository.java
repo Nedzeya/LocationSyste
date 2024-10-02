@@ -15,6 +15,7 @@ import java.util.Optional;
  */
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
+
     /**
      * Checks if a user with the given email exists in the database.
      *
